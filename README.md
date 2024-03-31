@@ -11,7 +11,7 @@ The goal of CuReSPR is to ...
 You can install the development version of CuReSPR like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("goknurginer/CuReSPR")
 ```
 
 ## Example
