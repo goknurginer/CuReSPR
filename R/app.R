@@ -1,9 +1,14 @@
+install.packages(shiny)
+install.packages(shinyWidgets)
+install.packages(shinythemes)
+install.packages(DT)
+install.packages(refund.shiny)
 library(shiny)
 library(shinyWidgets)
 library(shinythemes)
 library(DT)
-# source("global.R")
 library(refund.shiny)
+# source("global.R")
 options(shiny.maxRequestSize=100*1024^2)
 # Define UI ----
 ui <- navbarPage("CuReSPR", id = "main",
