@@ -1,13 +1,10 @@
-install.packages(shiny)
-install.packages(shinyWidgets)
-install.packages(shinythemes)
-install.packages(DT)
-install.packages(refund.shiny)
 library(shiny)
 library(shinyWidgets)
 library(shinythemes)
 library(DT)
 library(refund.shiny)
+library(tidyverse)
+
 # source("global.R")
 options(shiny.maxRequestSize=100*1024^2)
 # Define UI ----
@@ -17,31 +14,42 @@ ui <- navbarPage("CuReSPR", id = "main",
                  tabPanel("Data Upload",
                           sidebarLayout(
                             sidebarPanel(
+                              h3("Experiment Details Input"),
+                              helpText("First, define the number of comparison groups. Then, upload your fastq files and assign each to its group. Specify any biological or technical replicates, if they exist, and indicate whether the files are paired-end or single-end. Review and submit them for the counting step."),
+                              hr(),
                               h4("Set group numbers"),
+                              helpText("Enter number of groups in your experiment."),
                               numericInput("num",
                                            label = "",
                                            value = 0,
                                            min = 0),
+                              actionButton("nextnum", "Next"),
                               conditionalPanel(
-                                condition = "input.num > '0'",
+                                condition = "input.nextnum",
                                 hr(),
-                                h4("Assign group names to each group number"),
-                                uiOutput("textInputs"),
-                                checkboxInput("paired", label = "Select if the fastq files are paired-end"),
-                                actionButton("fastqupload", "Upload fastq files"),
+                                h4("Assign group names"),
+                                helpText("Enter names for each group."),
+                                uiOutput("groupInputs"),
+                                actionButton("nextupload", "Next")
                               ),
                               conditionalPanel(
-                                condition = "input.fastqupload",
+                                condition = "input.nextupload",
+                                hr(),
+                                h4("Upload fastq files"),
                                 fileInput("upload",
                                           label = "",
                                           accept = c('.fastq','fastq.gz'),
-                                          multiple = TRUE) # This option does not work on older browsers, including Internet Explorer 9 and earlier.
+                                          multiple = TRUE), # This option does not work on older browsers, including Internet Explorer 9 and earlier.
+                                checkboxInput("paired", label = "Fastq files are paired-end"),
+                                checkboxInput("tech", "There are technical replicates"),
+                                checkboxInput("bio", "There are biological replicates")
                               ),
                             ),
                             mainPanel(
-                              #DT::DTOutput("files"),
-                              tableOutput("selected_file_table"),
-                              textOutput("groups")
+                              conditionalPanel(
+                                condition = "input.upload",
+                                p("Groups are ", textOutput("groups", inline = TRUE))),
+                              DTOutput("my_datatable")
                             )
                           )
                  ),
@@ -81,14 +89,16 @@ ui <- navbarPage("CuReSPR", id = "main",
 
 # Define server logic ----
 server <- function(input, output) {
-  #----- numericInput -----
+
+  #----- Groups Input -----
   n <- reactive({input$num})
-  output$textInputs <- renderUI({
-    textInputs <- lapply(1:n(), function(i) {
+
+  output$groupInputs <- renderUI({
+    groupInputs <- lapply(1:n(), function(i) {
       textInput(paste0("group", i),
                 label = paste0("Group ", i))
     })
-    do.call(tagList, textInputs)
+    do.call(tagList, groupInputs)
   })
 
   values <- reactive({unlist(lapply(1:n(), function(i) {
@@ -96,18 +106,40 @@ server <- function(input, output) {
   output$groups <- renderText({
     req(values())
   })
-  # groups <- as.character(unlist(values))
-  #output$groups <- renderText(paste0("Groups are: ", values))
 
+  # #----- assign group names to fastqs -----
+  output$my_datatable <- renderDT({
+    data <- data.frame(Fastq = input$upload[,1],
+               Size = input$upload[,2],
+               Groups = seq(req(values())))
+    if(!as.logical(input[['tech']]) & !as.logical(input[['bio']]))
+      v <- reactive({
+        data
+      })
 
-#----- fileInput fastq files -----
-  # output$files <- DT::renderDT({
-  #   DT::datatable(input$upload, selection = c("single"))
-  # })
-  output$selected_file_table <- renderTable({
-    req(input$upload[,1:2])
+    else if (as.logical(input[['tech']]) & !as.logical(input[['bio']]))
+    v <- reactive({
+      data %>%
+        add_column(TechRep = rep(0,nrow(input$upload)))
+    })
+
+    else if(!as.logical(input[['tech']]) & as.logical(input[['bio']]))
+    v <- reactive({
+      data %>%
+        add_column(BioRep = rep(0,nrow(input$upload)))
+    })
+
+    else
+    v <- reactive({
+      data %>%
+        add_column(TechRep = rep(0,nrow(input$upload))) %>%
+        add_column(BioRep = rep(0,nrow(input$upload)))
+    })
+    DT::datatable(v(), editable = TRUE)
   })
+
 }
+
 # Run the app ----
 shinyApp(ui = ui, server = server)
 
