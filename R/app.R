@@ -4,7 +4,11 @@ library(shinythemes)
 library(DT)
 library(refund.shiny)
 library(tidyverse)
+rHandsontableOutput("mytable")
+renderRHandsontable({})
+library(rhandsontable)
 
+up = NULL
 # source("global.R")
 options(shiny.maxRequestSize=100*1024^2)
 # Define UI ----
@@ -29,7 +33,7 @@ ui <- navbarPage("CuReSPR", id = "main",
                                 hr(),
                                 h4("Assign group names"),
                                 helpText("Enter names for each group."),
-                                uiOutput("groupInputs"),
+                                uiOutput("groupnames"),
                                 actionButton("nextupload", "Next")
                               ),
                               conditionalPanel(
@@ -47,9 +51,9 @@ ui <- navbarPage("CuReSPR", id = "main",
                             ),
                             mainPanel(
                               conditionalPanel(
-                                condition = "input.upload",
-                                p("Groups are ", textOutput("groups", inline = TRUE))),
-                              DTOutput("my_datatable")
+                                condition = "input.nextupload",
+                              p("Groups are ", textOutput("groups", inline = TRUE))),
+                              DT::dataTableOutput("my_datatable")
                             )
                           )
                  ),
@@ -90,15 +94,25 @@ ui <- navbarPage("CuReSPR", id = "main",
 # Define server logic ----
 server <- function(input, output) {
 
-  #----- Groups Input -----
+  uploaded_data <- reactive({
+    return(input$upload)
+  })
+  modifiedData <- reactive({
+    req(uploaded_data())
+    data <- uploaded_data()
+    data$test <- req(values())
+    return(data)
+  })
+
+  #----- Groups Names -----
   n <- reactive({input$num})
 
-  output$groupInputs <- renderUI({
-    groupInputs <- lapply(1:n(), function(i) {
+  output$groupnames <- renderUI({
+    groupnames <- lapply(1:n(), function(i) {
       textInput(paste0("group", i),
                 label = paste0("Group ", i))
     })
-    do.call(tagList, groupInputs)
+    do.call(tagList, groupnames)
   })
 
   values <- reactive({unlist(lapply(1:n(), function(i) {
@@ -108,34 +122,57 @@ server <- function(input, output) {
   })
 
   # #----- assign group names to fastqs -----
-  output$my_datatable <- renderDT({
-    data <- data.frame(Fastq = input$upload[,1],
-               Size = input$upload[,2],
-               Groups = seq(req(values())))
-    if(!as.logical(input[['tech']]) & !as.logical(input[['bio']]))
-      v <- reactive({
-        data
+  output$my_datatable <- renderDataTable({
+
+
+
+    data <- data.frame(Fastq = modifiedData()[,1],Size = modifiedData()[,2],Test = modifiedData()[["test"]])
+
+    if(
+      !as.logical(input[['tech']])
+      & !as.logical(input[['bio']])
+    ){
+      v <- reactive({data})
+    }
+
+    else if (
+      as.logical(input[['tech']])
+      & !as.logical(input[['bio']])
+    ){
+      v <- reactive({data %>% add_column(TechRep = rep(0,nrow(modifiedData())))})
+    }
+
+    else if(
+      !as.logical(input[['tech']])
+      & as.logical(input[['bio']])
+    ){
+      v <- reactive({data %>% add_column(BioRep = rep(0,nrow(modifiedData())))})
+    }
+
+    else{
+      v <- reactive({data %>%
+          add_column(TechRep = rep(0,nrow(modifiedData()))) %>%
+          add_column(BioRep = rep(0,nrow(modifiedData())))
       })
+    }
 
-    else if (as.logical(input[['tech']]) & !as.logical(input[['bio']]))
-    v <- reactive({
-      data %>%
-        add_column(TechRep = rep(0,nrow(input$upload)))
-    })
+    for (i in 1:nrow(v())) {
+      data$species_selector[i] <- as.character(selectInput(paste0("sel", i), "", choices = unique(iris$Species), width = "100px"))
+    }
 
-    else if(!as.logical(input[['tech']]) & as.logical(input[['bio']]))
-    v <- reactive({
-      data %>%
-        add_column(BioRep = rep(0,nrow(input$upload)))
-    })
-
-    else
-    v <- reactive({
-      data %>%
-        add_column(TechRep = rep(0,nrow(input$upload))) %>%
-        add_column(BioRep = rep(0,nrow(input$upload)))
-    })
-    DT::datatable(v(), editable = TRUE)
+    DT::datatable(
+      v(),
+      editable = TRUE,
+      escape = FALSE,
+      selection = 'none',
+      options = list(dom = 't', paging = FALSE, ordering = FALSE),
+      callback = JS("table.rows().every(function(i, tab, row) {
+        var $this = $(this.node());
+        $this.attr('id', this.data()[0]);
+        $this.addClass('shiny-input-container');
+      });
+      Shiny.unbindAll(table.table().node());
+      Shiny.bindAll(table.table().node());"))
   })
 
 }
