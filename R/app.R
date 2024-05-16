@@ -11,6 +11,8 @@ options(shiny.maxRequestSize=100*1024^2)
 # Define UI ----
 ui <- navbarPage("CuReSPR", id = "main",
                  theme = shinytheme("cerulean"),
+                 tabsetPanel(
+                   id="inTabset",
 #----------------------- ui Data Upload ------------------------------------
                  tabPanel("Data Upload",
                           sidebarLayout(
@@ -38,6 +40,16 @@ ui <- navbarPage("CuReSPR", id = "main",
                               ),
                               conditionalPanel(
                                 condition = "input.nextupload",
+                                p("Groups are ", textOutput("groups", inline = TRUE))),
+                            ),
+                            mainPanel(
+                              conditionalPanel(
+                                condition = "input.nextupload",
+                                h4("Upload guide RNA library"),
+                                fileInput("uploadguides",
+                                          label = "",
+                                          accept = c('.tsv','.csv','.txt'),
+                                          multiple = TRUE), # This option does not work on older browsers, including Internet Explorer 9 and earlier.
                                 hr(),
                                 h4("Upload fastq files"),
                                 fileInput("upload",
@@ -47,24 +59,10 @@ ui <- navbarPage("CuReSPR", id = "main",
                                 checkboxInput("paired", label = "Fastq files are paired-end"),
                                 checkboxInput("tech", "There are technical replicates"),
                                 checkboxInput("bio", "There are biological replicates"),
-                                actionButton("nextuploadguides", "Next")
-                              ),
-                              conditionalPanel(
-                                condition = "input.nextuploadguides",
                                 hr(),
-                                h4("Upload guide RNA library"),
-                                fileInput("uploadguides",
-                                          label = "",
-                                          accept = c('.tsv','.csv','.txt'),
-                                          multiple = TRUE), # This option does not work on older browsers, including Internet Explorer 9 and earlier.
-                                actionButton("nextuploadguides", "Next")
+                                DT::dataTableOutput("my_datatable"),
+                                actionButton("gotocounting", "Next"),
                               ),
-                            ),
-                            mainPanel(
-                              conditionalPanel(
-                                condition = "input.nextupload",
-                                p("Groups are ", textOutput("groups", inline = TRUE))),
-                              DT::dataTableOutput("my_datatable"),
                               # actionButton("nextgroups", "Next"),
                               # conditionalPanel(
                               #   condition = "input.nextgroups",
@@ -112,11 +110,14 @@ tabPanel("Counting",
                             sidebarPanel(
                             )
                           )
-                 ),
+                 )),
 )
 
 # Define server logic ----
-server <- function(input, output) {
+server <- function(input, output, session) {
+  observeEvent(input$gotocounting, {
+    updateTabsetPanel(session, "inTabset", selected = "Counting")
+  })
 
   uploaded_data <- reactive({
     return(input$upload)
