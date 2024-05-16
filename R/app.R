@@ -59,10 +59,16 @@ ui <- navbarPage("CuReSPR", id = "main",
                                 checkboxInput("paired", label = "Fastq files are paired-end"),
                                 checkboxInput("tech", "There are technical replicates"),
                                 checkboxInput("bio", "There are biological replicates"),
+                                actionButton("nextdatatable", "Next"),
+                              ),
+                              conditionalPanel(
+                                condition = "input.nextdatatable",
                                 hr(),
+                                h4("Enter sample details"),
+                                helpText("Please enter the details about the samples in the following table."),
                                 DT::dataTableOutput("my_datatable"),
                                 actionButton("gotocounting", "Next"),
-                              ),
+                                )
                               # actionButton("nextgroups", "Next"),
                               # conditionalPanel(
                               #   condition = "input.nextgroups",
