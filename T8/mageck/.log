@@ -1,0 +1,137 @@
+INFO  @ Fri, 17 May 2024 12:33:53: Parameters: /Users/giner.g/miniconda3/envs/mageckenv/bin/mageck count -l ./guidelibrary/Brunello.tsv -n ./T8/mageck/ --sample-label Control,Vehicle,T8 --fastq ./fastqs/T0-Control.fastq.gz ./fastqs/T8-Vehicle.fastq.gz ./fastqs/T8-APR-246.fastq.gz 
+INFO  @ Fri, 17 May 2024 12:33:53: Welcome to MAGeCK v0.5.9.5. Command: count 
+INFO  @ Fri, 17 May 2024 12:33:53: Loading 77441 predefined sgRNAs. 
+WARNING @ Fri, 17 May 2024 12:33:53: There are 0 sgRNAs with duplicated sequences. 
+INFO  @ Fri, 17 May 2024 12:33:53: Parsing FASTQ file ./fastqs/T0-Control.fastq.gz... 
+INFO  @ Fri, 17 May 2024 12:33:53: Determining the trim-5 length of FASTQ file ./fastqs/T0-Control.fastq.gz... 
+INFO  @ Fri, 17 May 2024 12:33:53: Possible gRNA lengths:20 
+INFO  @ Fri, 17 May 2024 12:33:53: Processing 0M reads ... 
+INFO  @ Fri, 17 May 2024 12:33:55: Read length:75 
+INFO  @ Fri, 17 May 2024 12:33:55: Total tested reads: 100001, mapped: 83381(0.8338016619833801) 
+INFO  @ Fri, 17 May 2024 12:33:55: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Fri, 17 May 2024 12:33:55: 24	11893	0.14263441311569783 
+INFO  @ Fri, 17 May 2024 12:33:55: 22	10791	0.12941797291949006 
+INFO  @ Fri, 17 May 2024 12:33:55: 26	10550	0.12652762619781485 
+INFO  @ Fri, 17 May 2024 12:33:55: 28	10471	0.12558016814382172 
+INFO  @ Fri, 17 May 2024 12:33:55: 23	10373	0.12440484043127331 
+INFO  @ Fri, 17 May 2024 12:33:55: 25	10320	0.12376920401530325 
+INFO  @ Fri, 17 May 2024 12:33:55: 29	9781	0.11730490159628693 
+INFO  @ Fri, 17 May 2024 12:33:55: 30	8784	0.10534774109209533 
+INFO  @ Fri, 17 May 2024 12:33:55: 27	207	0.002482579964260443 
+INFO  @ Fri, 17 May 2024 12:33:55: 21	143	0.0017150190091267795 
+INFO  @ Fri, 17 May 2024 12:33:55: 31	31	0.0003717873376428683 
+INFO  @ Fri, 17 May 2024 12:33:55: 20	15	0.0001798970988594524 
+INFO  @ Fri, 17 May 2024 12:33:55: 35	4	4.7972559695853975e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 19	4	4.7972559695853975e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 18	3	3.597941977189048e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 16	2	2.3986279847926987e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 36	2	2.3986279847926987e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 37	2	2.3986279847926987e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 50	1	1.1993139923963494e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 32	1	1.1993139923963494e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 34	1	1.1993139923963494e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 17	1	1.1993139923963494e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: 33	1	1.1993139923963494e-05 
+INFO  @ Fri, 17 May 2024 12:33:55: Auto determination of trim5 results: 24,22,26,28,23,25 
+INFO  @ Fri, 17 May 2024 12:33:55: Possible gRNA lengths:20 
+INFO  @ Fri, 17 May 2024 12:33:55: Processing 0M reads .. 
+INFO  @ Fri, 17 May 2024 12:33:55: Total: 213111. 
+INFO  @ Fri, 17 May 2024 12:33:55: Mapped: 134151. 
+INFO  @ Fri, 17 May 2024 12:33:56: Parsing FASTQ file ./fastqs/T8-Vehicle.fastq.gz... 
+INFO  @ Fri, 17 May 2024 12:33:56: Determining the trim-5 length of FASTQ file ./fastqs/T8-Vehicle.fastq.gz... 
+INFO  @ Fri, 17 May 2024 12:33:56: Possible gRNA lengths:20 
+INFO  @ Fri, 17 May 2024 12:33:56: Processing 0M reads ... 
+INFO  @ Fri, 17 May 2024 12:33:57: Read length:75 
+INFO  @ Fri, 17 May 2024 12:33:57: Total tested reads: 100001, mapped: 83697(0.8369616303836962) 
+INFO  @ Fri, 17 May 2024 12:33:57: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Fri, 17 May 2024 12:33:57: 24	12006	0.1434460016488046 
+INFO  @ Fri, 17 May 2024 12:33:57: 22	10830	0.12939531882863184 
+INFO  @ Fri, 17 May 2024 12:33:57: 28	10502	0.12547642089919592 
+INFO  @ Fri, 17 May 2024 12:33:57: 23	10497	0.12541668160149108 
+INFO  @ Fri, 17 May 2024 12:33:57: 26	10431	0.12462812287178753 
+INFO  @ Fri, 17 May 2024 12:33:57: 25	10289	0.12293152681697074 
+INFO  @ Fri, 17 May 2024 12:33:57: 29	9859	0.11779394721435654 
+INFO  @ Fri, 17 May 2024 12:33:57: 30	8870	0.10597751412834391 
+INFO  @ Fri, 17 May 2024 12:33:57: 27	237	0.0028316427112082872 
+INFO  @ Fri, 17 May 2024 12:33:57: 21	124	0.0014815345830794413 
+INFO  @ Fri, 17 May 2024 12:33:57: 31	22	0.00026285290990119123 
+INFO  @ Fri, 17 May 2024 12:33:57: 20	8	9.55828763277059e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 14	4	4.779143816385295e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 19	3	3.584357862288971e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 17	2	2.3895719081926474e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 35	2	2.3895719081926474e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 38	2	2.3895719081926474e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 36	2	2.3895719081926474e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 37	2	2.3895719081926474e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 18	2	2.3895719081926474e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 44	1	1.1947859540963237e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 34	1	1.1947859540963237e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: 33	1	1.1947859540963237e-05 
+INFO  @ Fri, 17 May 2024 12:33:57: Auto determination of trim5 results: 24,22,28,23,26,25 
+INFO  @ Fri, 17 May 2024 12:33:57: Possible gRNA lengths:20 
+INFO  @ Fri, 17 May 2024 12:33:57: Processing 0M reads .. 
+INFO  @ Fri, 17 May 2024 12:33:58: Total: 184346. 
+INFO  @ Fri, 17 May 2024 12:33:58: Mapped: 116540. 
+INFO  @ Fri, 17 May 2024 12:33:58: Parsing FASTQ file ./fastqs/T8-APR-246.fastq.gz... 
+INFO  @ Fri, 17 May 2024 12:33:58: Determining the trim-5 length of FASTQ file ./fastqs/T8-APR-246.fastq.gz... 
+INFO  @ Fri, 17 May 2024 12:33:58: Possible gRNA lengths:20 
+INFO  @ Fri, 17 May 2024 12:33:58: Processing 0M reads ... 
+INFO  @ Fri, 17 May 2024 12:33:59: Read length:75 
+INFO  @ Fri, 17 May 2024 12:33:59: Total tested reads: 100001, mapped: 80667(0.8066619333806662) 
+INFO  @ Fri, 17 May 2024 12:33:59: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Fri, 17 May 2024 12:33:59: 24	11564	0.14335477952570444 
+INFO  @ Fri, 17 May 2024 12:33:59: 22	10469	0.12978045545266342 
+INFO  @ Fri, 17 May 2024 12:33:59: 23	10193	0.12635898198767773 
+INFO  @ Fri, 17 May 2024 12:33:59: 26	10150	0.12582592633914735 
+INFO  @ Fri, 17 May 2024 12:33:59: 28	10004	0.1240160164627419 
+INFO  @ Fri, 17 May 2024 12:33:59: 25	9947	0.12330940781236441 
+INFO  @ Fri, 17 May 2024 12:33:59: 29	9402	0.1165532373833166 
+INFO  @ Fri, 17 May 2024 12:33:59: 30	8462	0.10490039297358275 
+INFO  @ Fri, 17 May 2024 12:33:59: 27	247	0.0030619708183024035 
+INFO  @ Fri, 17 May 2024 12:33:59: 21	165	0.002045446093197962 
+INFO  @ Fri, 17 May 2024 12:33:59: 31	31	0.00038429593266143527 
+INFO  @ Fri, 17 May 2024 12:33:59: 20	9	0.00011156978690170702 
+INFO  @ Fri, 17 May 2024 12:33:59: 18	7	8.67765009235499e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 19	4	4.958657195631423e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 17	3	3.7189928967235675e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 35	2	2.4793285978157114e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 33	2	2.4793285978157114e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 40	1	1.2396642989078557e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 45	1	1.2396642989078557e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 34	1	1.2396642989078557e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 41	1	1.2396642989078557e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 44	1	1.2396642989078557e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: 49	1	1.2396642989078557e-05 
+INFO  @ Fri, 17 May 2024 12:33:59: Auto determination of trim5 results: 24,22,23,26,28,25 
+INFO  @ Fri, 17 May 2024 12:34:00: Possible gRNA lengths:20 
+INFO  @ Fri, 17 May 2024 12:34:00: Processing 0M reads .. 
+INFO  @ Fri, 17 May 2024 12:34:00: Total: 187963. 
+INFO  @ Fri, 17 May 2024 12:34:00: Mapped: 114090. 
+DEBUG @ Fri, 17 May 2024 12:34:01: Initial (total) size factor: 0.9063940385585398 1.0433642240146446 1.0657697139685045 
+DEBUG @ Fri, 17 May 2024 12:34:01: Median factor: 1.5262856567377754 1.8171205928321397 1.8171205928321397 
+INFO  @ Fri, 17 May 2024 12:34:01: Final size factor: 1.5262856567377754 1.8171205928321397 1.8171205928321397 
+INFO  @ Fri, 17 May 2024 12:34:01: Summary of file ./fastqs/T0-Control.fastq.gz: 
+INFO  @ Fri, 17 May 2024 12:34:01: label	Control 
+INFO  @ Fri, 17 May 2024 12:34:01: reads	213111 
+INFO  @ Fri, 17 May 2024 12:34:01: mappedreads	134151 
+INFO  @ Fri, 17 May 2024 12:34:01: totalsgrnas	77441 
+INFO  @ Fri, 17 May 2024 12:34:01: zerosgrnas	21619 
+INFO  @ Fri, 17 May 2024 12:34:01: giniindex	0.4241260099203754 
+INFO  @ Fri, 17 May 2024 12:34:01: Summary of file ./fastqs/T8-Vehicle.fastq.gz: 
+INFO  @ Fri, 17 May 2024 12:34:01: label	Vehicle 
+INFO  @ Fri, 17 May 2024 12:34:01: reads	184346 
+INFO  @ Fri, 17 May 2024 12:34:01: mappedreads	116540 
+INFO  @ Fri, 17 May 2024 12:34:01: totalsgrnas	77441 
+INFO  @ Fri, 17 May 2024 12:34:01: zerosgrnas	27232 
+INFO  @ Fri, 17 May 2024 12:34:01: giniindex	0.48284872370876997 
+INFO  @ Fri, 17 May 2024 12:34:01: Summary of file ./fastqs/T8-APR-246.fastq.gz: 
+INFO  @ Fri, 17 May 2024 12:34:01: label	T8 
+INFO  @ Fri, 17 May 2024 12:34:01: reads	187963 
+INFO  @ Fri, 17 May 2024 12:34:01: mappedreads	114090 
+INFO  @ Fri, 17 May 2024 12:34:01: totalsgrnas	77441 
+INFO  @ Fri, 17 May 2024 12:34:01: zerosgrnas	28274 
+INFO  @ Fri, 17 May 2024 12:34:01: giniindex	0.4939629426480724 
+INFO  @ Fri, 17 May 2024 12:34:01: Loading Rnw template file: /Users/giner.g/miniconda3/envs/mageckenv/lib/python3.10/site-packages/mageck/count_report.Rmd. 
+DEBUG @ Fri, 17 May 2024 12:34:01: Setting up the visualization module... 
+INFO  @ Fri, 17 May 2024 12:34:01: Loading Rnw template file: /Users/giner.g/miniconda3/envs/mageckenv/lib/python3.10/site-packages/mageck/fastq_template.Rnw. 
+DEBUG @ Fri, 17 May 2024 12:34:01: Setting up the visualization module... 
