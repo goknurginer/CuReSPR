@@ -75,3 +75,36 @@ colnames(my_counts) <- reads
 write.table(my_counts, paste0(path,"/rsubread/counts.txt"))
 
 # wehi-marek
+setwd(paste0(path,"/wehi"))
+library(tools)
+library(Biostrings)
+library(Rsubread)
+library(GenomicAlignments)
+dir.create("./index")
+source("/Users/giner.g/Documents/Github/CuReSPR/R/cutadapt_wrapper.R")
+source("/Users/giner.g/Documents/Github/CuReSPR/R/count_wrapper.R")
+guides <- read.csv("../guidelibrary/brunello.csv",header=FALSE)
+head(guides)
+sgRNAs <- DNAStringSet(guides$V2)
+names(sgRNAs) <- guides$V1
+sgRNAs
+writeXStringSet(sgRNAs, file = "./index/guides.fa")
+buildindex("./index/guides", "./index/guides.fa", indexSplit = FALSE)
+setwd(paste0(path,"/fastqs"))
+input1 <- "./T8-Vehicle.fastq.gz"
+guides_fasta <- paste0(path,"/wehi/index/guides.fa")
+outdir <-  "test"
+sample_name <- tools::file_path_sans_ext(basename(input1))
+
+trim_outfile <- cutadapt(input1,
+                         outdir,
+                         sample_name,
+                         front_adapter = "TATTTATTTTGCTACTTAATAATTGGGACT",
+                         mismatches = 1,
+                         cores = 1)
+
+count_output <- count(trim_outfile,
+                      guides_fasta,
+                      outdir,
+                      sample_name,
+                      guide_len = 20)
