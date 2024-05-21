@@ -18,6 +18,7 @@ import logging
 import pandas as pd
 import pyfastx as fx
 import re
+import edlib
 from io import StringIO
 from datetime import datetime
 from argparse import ArgumentParser
@@ -52,6 +53,7 @@ def parse_args():
                         '--library',
                         metavar='LIB',
                         type=str,
+                        required=True,
                         help='''
                         Fasta file containing guide sequences, or
                         comma-separated gzipped file containing
@@ -61,6 +63,21 @@ def parse_args():
                         metavar='LEN',
                         type=int,
                         help='Length of guide sequence.')
+    parser.add_argument('-p',
+                        '--primer',
+                        metavar='PRIMER',
+                        type=str,
+                        default="",
+                        help='''Primer sequence to trim from the 5' end of the
+                        guide sequence. Default is no primer (guide is at read
+                        start.''')
+    parser.add_argument('-m',
+                        '--primer_mismatches',
+                        metavar='M',
+                        type=int,
+                        default=1,
+                        help='''Number of mismatches allowed when matching
+                        primer sequences. Default is 1.''')
     parser.add_argument('-g',
                         '--genomics-barcodes',
                         action='store_true',
@@ -108,10 +125,12 @@ def read_crispr_library(library_file, guide_len):
 
     return crispr_library
 
-def count_amplicons(read1, guide_len):
+
+def count_amplicons(read1, guide_len, primer="", primer_mismatches=1):
     reads_processed = 0
     failed_reads = 0
     amplicon_dict = {}
+    primer_len = len(primer)
 
     for r1 in read1:
         reads_processed += 1
@@ -125,7 +144,17 @@ def count_amplicons(read1, guide_len):
             failed_reads += 1
             continue
 
-        guide = seq[:guide_len]
+        if primer_len > 0:
+            # check if primer is present
+            read_primer = seq[:primer_len]
+            primer_result = edlib.align(primer, read_primer, mode="HW",
+                                        task="path", k=primer_mismatches)
+            if primer_result['editDistance'] > primer_mismatches:
+                logging.info('Failed to match primer in read %s' % name)
+                failed_reads += 1
+                continue
+
+        guide = seq[primer_len:(guide_len+primer_len)]
         if guide in amplicon_dict:
             amplicon_dict[guide] += 1
         else:
@@ -185,7 +214,7 @@ def main():
 
     # initialise logging
     basename = os.path.splitext(os.path.basename(args.read1))[0]
-    basename = os.path.splitext(basename)[0] # split again for .fastq.gz files
+    basename = os.path.splitext(basename)[0]  # split again for .fastq.gz files
     logfile = f'{basename}_' + datetime.now().strftime('%H-%M-%d-%m-%Y.log')
     init_log(logfile)
 
@@ -217,7 +246,8 @@ def main():
 
     # read in fastq
     read1 = fx.Fastq(args.read1, build_index=False)
-    counts = count_amplicons(read1, args.guide_len)
+    counts = count_amplicons(read1, args.guide_len,
+                             args.primer, args.primer_mismatches)
 
     # write counts to file
     counts = match_counts(basename, counts, crispr_library,
