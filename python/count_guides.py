@@ -72,7 +72,7 @@ def parse_args():
                         guide sequence. Default is no primer (guide is at read
                         start.''')
     parser.add_argument('-m',
-                        '--primer_mismatches',
+                        '--primer-mismatches',
                         metavar='M',
                         type=int,
                         default=1,
@@ -84,8 +84,57 @@ def parse_args():
                         help='''Whether to expect Genomics barcode format
                         for file name (e.g., Fwd_01-Rev_01_R1.fastq).
                         Default is False.''')
+    parser.add_argument('-I',
+                        '--infer-primer',
+                        action='store_true',
+                        help='Infer primer sequence.')
+    parser.add_argument('-n',
+                        '--num-infer',
+                        metavar='N',
+                        type=int,
+                        default=20,
+                        help='Number of reads to use for primer inference.')
+    parser.add_argument('-P',
+                        '--primer-len',
+                        metavar='PL',
+                        type=int,
+                        default=30,
+                        help='Length of primer sequence for inference.')
 
     return parser.parse_args()
+
+
+def infer_primer(read1, num_reads, primer_len):
+    '''
+    Infer primer sequence from first num_reads reads
+    '''
+    reads_processed = 0
+    primer_dict = {}
+    primer = ""
+
+    for r1 in read1:
+        reads_processed += 1
+        if reads_processed > num_reads:
+            break
+
+        try:
+            name, seq, qual = r1
+        except Exception as e:
+            logging.info('Error reading read(s) %s (%s)' % (r1.name, type(e)))
+            continue
+
+        tmp_primer = seq[:primer_len]
+        if tmp_primer in primer_dict:
+            primer_dict[tmp_primer] += 1
+        else:
+            primer_dict[tmp_primer] = 1
+
+    if len(primer_dict) == 0:
+        logging.error('Failed to infer primer sequence')
+    else:
+        primer = max(primer_dict, key=primer_dict.get)
+
+    return primer
 
 
 def read_crispr_library(library_file, guide_len):
@@ -241,13 +290,22 @@ def main():
         print('\t'.join(output_colnames), file=sys.stdout)
         return
 
+    # infer primer sequence if infer_primer > 0 is specified
+    if args.infer_primer:
+        logging.info('Infering primer sequence')
+        read1 = fx.Fastq(args.read1, build_index=False)
+        primer = infer_primer(read1, args.num_infer, args.primer_len)
+        logging.info('Inferred primer sequence: %s' % primer)
+    else:
+        primer = args.primer
+
     # read in CRISPR library
     crispr_library = read_crispr_library(args.library, args.guide_len)
 
     # read in fastq
     read1 = fx.Fastq(args.read1, build_index=False)
     counts = count_amplicons(read1, args.guide_len,
-                             args.primer, args.primer_mismatches)
+                             primer, args.primer_mismatches)
 
     # write counts to file
     counts = match_counts(basename, counts, crispr_library,
