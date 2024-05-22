@@ -1,4 +1,4 @@
-count_path <- "../python/count_guides.py"
+count_path <- "python/count_guides.py"
 
 count <- function(fq1_trimmed,
                   guides_fasta,
