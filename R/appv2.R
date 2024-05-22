@@ -7,7 +7,7 @@ library(tidyverse)
 options(shiny.reactlog=TRUE)
 
 # source("global.R")
-options(shiny.maxRequestSize=100*1024^2)
+options(shiny.maxRequestSize=1000*1024^2)
 # Define UI ----
 ui <- navbarPage("CuReSPR", id = "main",
                  theme = shinytheme("cerulean"),

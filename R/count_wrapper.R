@@ -1,4 +1,4 @@
-count_path <- "../python/count_guides.py" # assume that cutadapt is in our path
+count_path <- "./python/count_guides.py" # assume that cutadapt is in our path
 
 count <- function(fq1_trimmed,
                   guides_fasta,

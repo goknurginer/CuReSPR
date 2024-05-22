@@ -8,3 +8,7 @@ fastqs/
 bams/
 fastq_files/
 index/
+RData/
+denemeler/
+wehi_marek_counting/
+guidelibrary/
