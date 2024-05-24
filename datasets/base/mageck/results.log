@@ -1,0 +1,126 @@
+INFO  @ Wed, 22 May 2024 13:21:58: Parameters: /Users/giner.g/miniconda3/envs/mageckenv/bin/mageck count -l ../guidelibrary/guide_library.tsv -n results --sample-label base,base,low,low,high,high --fastq ../fastqs/Base1.fastq ../fastqs/Base1.fastq ../fastqs/Low1.fastq ../fastqs/Low2.fastq ../fastqs/High1.fastq ../fastqs/High2.fastq 
+INFO  @ Wed, 22 May 2024 13:21:58: Welcome to MAGeCK v0.5.9.5. Command: count 
+INFO  @ Wed, 22 May 2024 13:21:58: Loading 25 predefined sgRNAs. 
+WARNING @ Wed, 22 May 2024 13:21:58: There are 0 sgRNAs with duplicated sequences. 
+INFO  @ Wed, 22 May 2024 13:21:58: Parsing FASTQ file ../fastqs/Base1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Determining the trim-5 length of FASTQ file ../fastqs/Base1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads ... 
+INFO  @ Wed, 22 May 2024 13:21:58: Read length:80 
+INFO  @ Wed, 22 May 2024 13:21:58: Total tested reads: 688, mapped: 688(1.0) 
+INFO  @ Wed, 22 May 2024 13:21:58: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Wed, 22 May 2024 13:21:58: 30	688	1.0 
+INFO  @ Wed, 22 May 2024 13:21:58: Auto determination of trim5 results: 30 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads .. 
+INFO  @ Wed, 22 May 2024 13:21:58: Total: 688. 
+INFO  @ Wed, 22 May 2024 13:21:58: Mapped: 688. 
+INFO  @ Wed, 22 May 2024 13:21:58: Parsing FASTQ file ../fastqs/Base1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Determining the trim-5 length of FASTQ file ../fastqs/Base1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads ... 
+INFO  @ Wed, 22 May 2024 13:21:58: Read length:80 
+INFO  @ Wed, 22 May 2024 13:21:58: Total tested reads: 688, mapped: 688(1.0) 
+INFO  @ Wed, 22 May 2024 13:21:58: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Wed, 22 May 2024 13:21:58: 30	688	1.0 
+INFO  @ Wed, 22 May 2024 13:21:58: Auto determination of trim5 results: 30 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads .. 
+INFO  @ Wed, 22 May 2024 13:21:58: Total: 688. 
+INFO  @ Wed, 22 May 2024 13:21:58: Mapped: 688. 
+INFO  @ Wed, 22 May 2024 13:21:58: Parsing FASTQ file ../fastqs/Low1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Determining the trim-5 length of FASTQ file ../fastqs/Low1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads ... 
+INFO  @ Wed, 22 May 2024 13:21:58: Read length:80 
+INFO  @ Wed, 22 May 2024 13:21:58: Total tested reads: 1730, mapped: 1730(1.0) 
+INFO  @ Wed, 22 May 2024 13:21:58: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Wed, 22 May 2024 13:21:58: 30	1730	1.0 
+INFO  @ Wed, 22 May 2024 13:21:58: Auto determination of trim5 results: 30 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads .. 
+INFO  @ Wed, 22 May 2024 13:21:58: Total: 1730. 
+INFO  @ Wed, 22 May 2024 13:21:58: Mapped: 1730. 
+INFO  @ Wed, 22 May 2024 13:21:58: Parsing FASTQ file ../fastqs/Low2.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Determining the trim-5 length of FASTQ file ../fastqs/Low2.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads ... 
+INFO  @ Wed, 22 May 2024 13:21:58: Read length:80 
+INFO  @ Wed, 22 May 2024 13:21:58: Total tested reads: 2001, mapped: 2001(1.0) 
+INFO  @ Wed, 22 May 2024 13:21:58: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Wed, 22 May 2024 13:21:58: 30	2001	1.0 
+INFO  @ Wed, 22 May 2024 13:21:58: Auto determination of trim5 results: 30 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads .. 
+INFO  @ Wed, 22 May 2024 13:21:58: Total: 2001. 
+INFO  @ Wed, 22 May 2024 13:21:58: Mapped: 2001. 
+INFO  @ Wed, 22 May 2024 13:21:58: Parsing FASTQ file ../fastqs/High1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Determining the trim-5 length of FASTQ file ../fastqs/High1.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads ... 
+INFO  @ Wed, 22 May 2024 13:21:58: Read length:80 
+INFO  @ Wed, 22 May 2024 13:21:58: Total tested reads: 703, mapped: 703(1.0) 
+INFO  @ Wed, 22 May 2024 13:21:58: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Wed, 22 May 2024 13:21:58: 30	703	1.0 
+INFO  @ Wed, 22 May 2024 13:21:58: Auto determination of trim5 results: 30 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads .. 
+INFO  @ Wed, 22 May 2024 13:21:58: Total: 703. 
+INFO  @ Wed, 22 May 2024 13:21:58: Mapped: 703. 
+INFO  @ Wed, 22 May 2024 13:21:58: Parsing FASTQ file ../fastqs/High2.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Determining the trim-5 length of FASTQ file ../fastqs/High2.fastq... 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads ... 
+INFO  @ Wed, 22 May 2024 13:21:58: Read length:80 
+INFO  @ Wed, 22 May 2024 13:21:58: Total tested reads: 659, mapped: 659(1.0) 
+INFO  @ Wed, 22 May 2024 13:21:58: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Wed, 22 May 2024 13:21:58: 30	659	1.0 
+INFO  @ Wed, 22 May 2024 13:21:58: Auto determination of trim5 results: 30 
+INFO  @ Wed, 22 May 2024 13:21:58: Possible gRNA lengths:20 
+INFO  @ Wed, 22 May 2024 13:21:58: Processing 0M reads .. 
+INFO  @ Wed, 22 May 2024 13:21:58: Total: 659. 
+INFO  @ Wed, 22 May 2024 13:21:58: Mapped: 659. 
+DEBUG @ Wed, 22 May 2024 13:21:58: Initial (total) size factor: 1.5671027131782946 1.5671027131782946 0.6232177263969172 0.5388139263701482 1.5336652441915601 1.6360647445624685 
+WARNING @ Wed, 22 May 2024 13:21:58: Sample 5 has too many zero-count sgRNAs (0.32), and median normalization may be unstable. Consider switching to total read count normalization. 
+DEBUG @ Wed, 22 May 2024 13:21:58: Median factor: 0.7218479172795892 0.7218479172795892 0.5295841298022982 1.1520689074690047 10.949857218586676 6.144367506501358 
+INFO  @ Wed, 22 May 2024 13:21:58: Final size factor: 0.7218479172795892 0.7218479172795892 0.5295841298022982 1.1520689074690047 10.949857218586676 6.144367506501358 
+WARNING @ Wed, 22 May 2024 13:21:58: Some samples have unusually small or large normalization factors (<0.2 or >5). Please double-check with the normalization process. 
+INFO  @ Wed, 22 May 2024 13:21:58: Summary of file ../fastqs/Base1.fastq: 
+INFO  @ Wed, 22 May 2024 13:21:58: label	base 
+INFO  @ Wed, 22 May 2024 13:21:58: reads	688 
+INFO  @ Wed, 22 May 2024 13:21:58: mappedreads	688 
+INFO  @ Wed, 22 May 2024 13:21:58: totalsgrnas	25 
+INFO  @ Wed, 22 May 2024 13:21:58: zerosgrnas	0 
+INFO  @ Wed, 22 May 2024 13:21:58: giniindex	0.10614731367766927 
+INFO  @ Wed, 22 May 2024 13:21:58: Summary of file ../fastqs/Low1.fastq: 
+INFO  @ Wed, 22 May 2024 13:21:58: label	low 
+INFO  @ Wed, 22 May 2024 13:21:58: reads	1730 
+INFO  @ Wed, 22 May 2024 13:21:58: mappedreads	1730 
+INFO  @ Wed, 22 May 2024 13:21:58: totalsgrnas	25 
+INFO  @ Wed, 22 May 2024 13:21:58: zerosgrnas	4 
+INFO  @ Wed, 22 May 2024 13:21:58: giniindex	0.3942923307396725 
+INFO  @ Wed, 22 May 2024 13:21:58: Summary of file ../fastqs/Low2.fastq: 
+INFO  @ Wed, 22 May 2024 13:21:58: label	low 
+INFO  @ Wed, 22 May 2024 13:21:58: reads	2001 
+INFO  @ Wed, 22 May 2024 13:21:58: mappedreads	2001 
+INFO  @ Wed, 22 May 2024 13:21:58: totalsgrnas	25 
+INFO  @ Wed, 22 May 2024 13:21:58: zerosgrnas	4 
+INFO  @ Wed, 22 May 2024 13:21:58: giniindex	0.4063268595111277 
+INFO  @ Wed, 22 May 2024 13:21:58: Summary of file ../fastqs/High1.fastq: 
+INFO  @ Wed, 22 May 2024 13:21:58: label	high 
+INFO  @ Wed, 22 May 2024 13:21:58: reads	703 
+INFO  @ Wed, 22 May 2024 13:21:58: mappedreads	703 
+INFO  @ Wed, 22 May 2024 13:21:58: totalsgrnas	25 
+INFO  @ Wed, 22 May 2024 13:21:58: zerosgrnas	7 
+INFO  @ Wed, 22 May 2024 13:21:58: giniindex	0.5440737135650393 
+INFO  @ Wed, 22 May 2024 13:21:58: Summary of file ../fastqs/High2.fastq: 
+INFO  @ Wed, 22 May 2024 13:21:58: label	high 
+INFO  @ Wed, 22 May 2024 13:21:58: reads	659 
+INFO  @ Wed, 22 May 2024 13:21:58: mappedreads	659 
+INFO  @ Wed, 22 May 2024 13:21:58: totalsgrnas	25 
+INFO  @ Wed, 22 May 2024 13:21:58: zerosgrnas	8 
+INFO  @ Wed, 22 May 2024 13:21:58: giniindex	0.5635822476129941 
+INFO  @ Wed, 22 May 2024 13:21:58: Loading Rnw template file: /Users/giner.g/miniconda3/envs/mageckenv/lib/python3.10/site-packages/mageck/count_report.Rmd. 
+DEBUG @ Wed, 22 May 2024 13:21:58: Setting up the visualization module... 
+INFO  @ Wed, 22 May 2024 13:21:58: Loading Rnw template file: /Users/giner.g/miniconda3/envs/mageckenv/lib/python3.10/site-packages/mageck/fastq_template.Rnw. 
+DEBUG @ Wed, 22 May 2024 13:21:58: Setting up the visualization module... 

@@ -1,7 +1,0 @@
-Sample_ID   Condition   Replicate   FASTQ_File
-Sample1     Control     Replicate1	./fastqs/PBS_Repl1_S14_L008_R1_001_x.fastq
-Sample1     Control     Replicate2	./fastqs/PBS_R2_S15_L008_R1_001_x.fastq
-Sample2     ToxA   Replicate1	./fastqs/Tox-A_R01_98_S2_L008_R1_001_x.fastq
-Sample2     ToxA   Replicate2	./fastqs/Tox-A_R2_S2_L005_R1_001_x.fastq
-Sample3     ToxB   Replicate1	./fastqs/Tox-B-Repl1_98_S4_L008_R1_001_x.fastq
-Sample3     ToxB   Replicate2	./fastqs/Tox-B-Repl2_S4_L005_R1_001_x.fastq
