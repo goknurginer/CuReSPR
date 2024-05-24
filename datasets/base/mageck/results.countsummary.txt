@@ -1,0 +1,6 @@
+File	Label	Reads	Mapped	Percentage	TotalsgRNAs	Zerocounts	GiniIndex	NegSelQC	NegSelQCPval	NegSelQCPvalPermutation	NegSelQCPvalPermutationFDR	NegSelQCGene
+../fastqs/Base1.fastq	base	688	688	1	25	0	0.1061	0	1	1	1	0.0
+../fastqs/Low1.fastq	low	1730	1730	1	25	4	0.3943	0	1	1	1	0.0
+../fastqs/Low2.fastq	low	2001	2001	1	25	4	0.4063	0	1	1	1	0.0
+../fastqs/High1.fastq	high	703	703	1	25	7	0.5441	0	1	1	1	0.0
+../fastqs/High2.fastq	high	659	659	1	25	8	0.5636	0	1	1	1	0.0

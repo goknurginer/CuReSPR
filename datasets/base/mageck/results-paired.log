@@ -1,0 +1,3 @@
+INFO  @ Wed, 22 May 2024 14:28:51: Parameters: /Users/giner.g/miniconda3/envs/mageckenv/bin/mageck count -l ../guidelibrary/guide_library.tsv -n results-paired --sample-label base,low,high --fastq ../fastqs/Base1.fastq ../fastqs/Low1.fastq ../fastqs/High1.fastq --fastq-2 ../fastqs/Base2.fastq . ../fastqs/Low2.fastq ../fastqs/High2.fastq 
+INFO  @ Wed, 22 May 2024 14:28:51: Welcome to MAGeCK v0.5.9.5. Command: count 
+ERROR @ Wed, 22 May 2024 14:28:51: The number of paired fastqs must be equal to the number of fastq files provided. 

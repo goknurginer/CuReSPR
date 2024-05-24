@@ -1,4 +1,0 @@
-File	Label	Reads	Mapped	Percentage	TotalsgRNAs	Zerocounts	GiniIndex	NegSelQC	NegSelQCPval	NegSelQCPvalPermutation	NegSelQCPvalPermutationFDR	NegSelQCGene
-./fastqs/T0-Control.fastq.gz	Control	213111	134151	0.6295	77441	21619	0.4241	0	1	1	1	0.0
-./fastqs/T8-Vehicle.fastq.gz	Vehicle	184346	116540	0.6322	77441	27232	0.4828	0	1	1	1	0.0
-./fastqs/T8-APR-246.fastq.gz	T8	187963	114090	0.607	77441	28274	0.494	0	1	1	1	0.0
