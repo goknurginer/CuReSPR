@@ -252,15 +252,15 @@ server <- function(input, output, session) {
 
   count_data <- reactive({
     if (input$counting=="Rsubread"){
-      data <- read_tsv("/Users/giner.g/Documents/Github/CuReSPR/counts/Base1.tsv")
+      data <- read_tsv("/Users/giner.g/Documents/Github/CuReSPR/countmatrices/Base1.tsv")
       data
     }
     else if (input$counting=="MAGeCK"){
-      data <- read_tsv("/Users/giner.g/Documents/Github/CuReSPR/counts/High1.tsv")
+      data <- read_tsv("/Users/giner.g/Documents/Github/CuReSPR/countmatrices/High1.tsv")
       data
     }
     else {
-      data <- read.csv("/Users/giner.g/Documents/Github/CuReSPR/counts/count_matrix_WEHI.csv")
+      data <- read.csv("/Users/giner.g/Documents/Github/CuReSPR/countmatrices/count_matrix_WEHI.csv")
       data
     }
   })
