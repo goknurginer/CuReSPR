@@ -24,6 +24,7 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 LIBRARY_FILE_COLNAMES = ['library', 'sequence', 'gene', 'other']
+GUIDE_LEN_WARNING = 'WARNING: Insert length param does not match library'
 
 
 def init_log(filename):
@@ -61,6 +62,7 @@ def parse_args():
     parser.add_argument('-i',
                         '--guide-len',
                         metavar='LEN',
+                        default=20,
                         type=int,
                         help='Length of guide sequence.')
     parser.add_argument('-p',
@@ -154,13 +156,17 @@ def read_crispr_library(library_file, guide_len):
         # check that guide length is correct
         cur_guide_len = crispr_library.sequence.map(len).unique()[0]
         if cur_guide_len != guide_len:
-            raise ValueError('Insert does not match library insert length')
+            logging.info(GUIDE_LEN_WARNING)
+            logging.info('Guide length set to %d' % cur_guide_len)
+            guide_len = cur_guide_len
     elif library_file.endswith(('fasta', 'fa')):
         crispr_library = pd.DataFrame()
         fasta = fx.Fasta(library_file, build_index=False, full_name=True)
         for name, seq in fasta:
             if len(seq) != guide_len:
-                raise ValueError('Insert does not match library insert length')
+                logging.info(GUIDE_LEN_WARNING)
+                logging.info('Guide length set to %d' % cur_guide_len)
+                guide_len = len(seq)
             record_to_add = pd.DataFrame(
                     {'library': os.path.basename(library_file).split('.')[0],
                      'sequence': seq,
@@ -172,7 +178,7 @@ def read_crispr_library(library_file, guide_len):
     else:
         raise ValueError('Invalid library file: expected csv.gz or fasta.')
 
-    return crispr_library
+    return crispr_library, guide_len
 
 
 def count_amplicons(read1, guide_len, primer="", primer_mismatches=1):
@@ -193,17 +199,21 @@ def count_amplicons(read1, guide_len, primer="", primer_mismatches=1):
             failed_reads += 1
             continue
 
+        primer_start = 0
         if primer_len > 0:
             # check if primer is present
-            read_primer = seq[:primer_len]
-            primer_result = edlib.align(primer, read_primer, mode="HW",
+            primer_result = edlib.align(primer, seq, mode="HW",
                                         task="path", k=primer_mismatches)
-            if primer_result['editDistance'] > primer_mismatches:
+            edit_distance = primer_result['editDistance']
+            locations = primer_result['locations']
+            if edit_distance > primer_mismatches or len(locations) == 0:
                 logging.info('Failed to match primer in read %s' % name)
                 failed_reads += 1
                 continue
+            primer_start = primer_result['locations'][0][0]
 
-        guide = seq[primer_len:(guide_len+primer_len)]
+        primer_offset = primer_start + primer_len
+        guide = seq[primer_offset:(guide_len+primer_offset)]
         if guide in amplicon_dict:
             amplicon_dict[guide] += 1
         else:
@@ -300,11 +310,12 @@ def main():
         primer = args.primer
 
     # read in CRISPR library
-    crispr_library = read_crispr_library(args.library, args.guide_len)
+    guide_len = args.guide_len
+    crispr_library, guide_len = read_crispr_library(args.library, guide_len)
 
     # read in fastq
     read1 = fx.Fastq(args.read1, build_index=False)
-    counts = count_amplicons(read1, args.guide_len,
+    counts = count_amplicons(read1, guide_len,
                              primer, args.primer_mismatches)
 
     # write counts to file
