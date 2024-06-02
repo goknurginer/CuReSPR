@@ -38,10 +38,10 @@ ui <- navbarPage("CuReSPR", id = "main",
                                 uiOutput("groupnames"),
                                 actionButton("nextupload", "Next")
                               ),
-                              conditionalPanel(
-                                condition = "input.nextupload",
-                                p("Groups are ", textOutput("groups", inline = TRUE))),
-                            ),
+                            #   conditionalPanel(
+                            #     condition = "input.nextupload",
+                            #     p("Groups are ", textOutput("groups", inline = TRUE))),
+                             ),
                             mainPanel(
                               conditionalPanel(
                                 condition = "input.nextupload",
@@ -67,7 +67,7 @@ ui <- navbarPage("CuReSPR", id = "main",
                                 h4("Enter sample details"),
                                 helpText("Please enter the details about the samples in the following table."),
                                 DT::dataTableOutput("my_datatable"),
-                                actionButton("gotocounting", "Next"),
+                                actionButton("gotocounting", "Go to counting"),
                                 )
                               # actionButton("nextgroups", "Next"),
                               # conditionalPanel(
@@ -86,10 +86,14 @@ tabPanel("Counting",
                "",
                choices = c("Rsubread","MAGeCK","WEHI"),
              ),
+             actionButton("guidecounts", "Get guide counts"),
            ),
            mainPanel(
-             tableOutput("count_table"),
-             downloadButton("download", "Download"),
+             conditionalPanel(
+               condition = "input.guidecounts",
+               DT::dataTableOutput("count_table"),
+               downloadButton("download", "Download"),
+             )
            )
          )
 ),
@@ -125,6 +129,8 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "inTabset", selected = "Counting")
   })
 
+
+  #----- Define global reactive variables -----
   uploaded_data <- reactive({
     return(input$upload)
   })
@@ -133,15 +139,34 @@ server <- function(input, output, session) {
     req(uploaded_data())
     data <- uploaded_data()
     for (i in 1:nrow(data)) {
-      data$group[i] <- as.character(selectInput(paste0("sel", i),
-                                                "",
+      data$group[i] <- as.character(selectInput(paste0("sel", i), "",
                                                 choices = unique(req(values())),
                                                 width = "100px"))
     }
     return(data)
   })
 
-  #----- Groups Names -----
+  values <- reactive({
+    unlist(lapply(1:n(),
+                  function(i) {
+                    input[[paste0("group", i)]]}))
+  })
+
+  count_data <- reactive({
+    if (input$counting=="Rsubread"){
+      data <- read.table("/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/rsubread/counts_rsubread.csv", sep = "\t", header = T)
+      datatable(data)
+    }
+    else if (input$counting=="MAGeCK"){
+      data <- read.table("/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/mageck/counts_mageck.csv", sep = "\t", header = T)
+      datatable(data)
+    }
+    else {
+      data <- read.table("/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/wehi/counts_wehi.csv", sep = "\t", header = T)
+      datatable(data)
+    }
+  })
+
   n <- reactive({
     input$num
     })
@@ -150,6 +175,7 @@ server <- function(input, output, session) {
     nrow(req(modified_data()))
   })
 
+  #----- Define output variables -----
   output$groupnames <- renderUI({
     groupnames <- lapply(1:n(),
                          function(i) {
@@ -158,17 +184,10 @@ server <- function(input, output, session) {
     do.call(tagList, groupnames)
   })
 
-  values <- reactive({
-    unlist(lapply(1:n(),
-                  function(i) {
-                    input[[paste0("group", i)]]}))
-    })
-
   output$groups <- renderText({
     req(values())
   })
 
-  # #----- assign group names to fastqs -----
   output$my_datatable <- renderDT({
     data <- data.frame(Fastq = modified_data()[,1],
                        Size = modified_data()[,2],
@@ -234,7 +253,6 @@ server <- function(input, output, session) {
       }
     }
 
-
     DT::datatable(
       v(),
       editable = TRUE,
@@ -250,22 +268,7 @@ server <- function(input, output, session) {
       Shiny.bindAll(table.table().node());"))
   })
 
-  count_data <- reactive({
-    if (input$counting=="Rsubread"){
-      data <- read_tsv("/Users/giner.g/Documents/Github/CuReSPR/countmatrices/Base1.tsv")
-      data
-    }
-    else if (input$counting=="MAGeCK"){
-      data <- read_tsv("/Users/giner.g/Documents/Github/CuReSPR/countmatrices/High1.tsv")
-      data
-    }
-    else {
-      data <- read.csv("/Users/giner.g/Documents/Github/CuReSPR/countmatrices/count_matrix_WEHI.csv")
-      data
-    }
-  })
-
-  output$count_table <- renderTable({
+  output$count_table <- renderDT({
     count_data()
   })
 
