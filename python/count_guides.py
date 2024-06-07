@@ -94,19 +94,19 @@ def parse_args():
                         '--num-infer',
                         metavar='N',
                         type=int,
-                        default=20,
+                        default=10,
                         help='Number of reads to use for primer inference.')
     parser.add_argument('-P',
                         '--primer-len',
                         metavar='PL',
                         type=int,
-                        default=30,
+                        default=20,
                         help='Length of primer sequence for inference.')
 
     return parser.parse_args()
 
 
-def infer_primer(read1, num_reads, primer_len):
+def infer_primer(read1, num_reads, primer_len, crispr_library):
     '''
     Infer primer sequence from first num_reads reads
     '''
@@ -114,6 +114,7 @@ def infer_primer(read1, num_reads, primer_len):
     primer_dict = {}
     primer = ""
 
+    logging.info('Inferring primer sequence...')
     for r1 in read1:
         reads_processed += 1
         if reads_processed > num_reads:
@@ -125,16 +126,34 @@ def infer_primer(read1, num_reads, primer_len):
             logging.info('Error reading read(s) %s (%s)' % (r1.name, type(e)))
             continue
 
-        tmp_primer = seq[:primer_len]
-        if tmp_primer in primer_dict:
-            primer_dict[tmp_primer] += 1
-        else:
-            primer_dict[tmp_primer] = 1
+        found_guide = False
+        for guide in crispr_library.sequence.values:
+            guide_align = edlib.align(guide, seq, mode="HW",
+                                      task="path")
+            loc = guide_align['locations']
+            if len(loc) > 0 and loc[0][0] >= primer_len:
+                startloc = loc[0][0]
+                guide_from_read = seq[startloc:(startloc + len(guide))]
+                if not guide_from_read == guide:
+                    continue
+
+                tmp_primer = seq[(startloc - primer_len):startloc]
+                if tmp_primer in primer_dict:
+                    primer_dict[tmp_primer] += 1
+                else:
+                    primer_dict[tmp_primer] = 1
+
+                found_guide = True
+                break
+
+        if not found_guide:
+            logging.info('No guide found in read %s' % name)
 
     if len(primer_dict) == 0:
         logging.error('Failed to infer primer sequence')
     else:
         primer = max(primer_dict, key=primer_dict.get)
+        logging.info('Inferred primer sequence: %s' % primer)
 
     return primer
 
@@ -300,18 +319,17 @@ def main():
         print('\t'.join(output_colnames), file=sys.stdout)
         return
 
-    # infer primer sequence if infer_primer > 0 is specified
-    if args.infer_primer:
-        logging.info('Infering primer sequence')
-        read1 = fx.Fastq(args.read1, build_index=False)
-        primer = infer_primer(read1, args.num_infer, args.primer_len)
-        logging.info('Inferred primer sequence: %s' % primer)
-    else:
-        primer = args.primer
-
     # read in CRISPR library
     guide_len = args.guide_len
     crispr_library, guide_len = read_crispr_library(args.library, guide_len)
+
+    # infer primer sequence if infer_primer > 0 is specified
+    if args.infer_primer:
+        read1 = fx.Fastq(args.read1, build_index=False)
+        primer = infer_primer(read1, args.num_infer,
+                              args.primer_len, crispr_library)
+    else:
+        primer = args.primer
 
     # read in fastq
     read1 = fx.Fastq(args.read1, build_index=False)
