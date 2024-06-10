@@ -173,13 +173,13 @@ The corresponding fastq files in each row are listed in Table 3.
 
 <<label=tab1,echo=FALSE,results=tex>>=
 library(xtable)
-filelist=c("../fastqfiles/Base1.fastq","../fastqfiles/Low1.fastq","../fastqfiles/Low2.fastq","../fastqfiles/High1.fastq","../fastqfiles/High2.fastq");
-labellist=c("base","low","low","high","high");
-reads=c(688,1730,2001,703,659);
-mappedreads=c(688,1730,2001,703,659);
-totalsgrnas=c(25,25,25,25,25);
-zerocounts=c(0,4,4,7,8);
-giniindex=c(0.10614731367766927,0.3942923307396725,0.4063268595111277,0.5440737135650393,0.5635822476129941);
+filelist=c("../fastqfiles/Base1.fastq","../fastqfiles/Low1.fastq","../fastqfiles/High1.fastq");
+labellist=c("base","low","high");
+reads=c(688,1730,703);
+mappedreads=c(688,1730,703);
+totalsgrnas=c(25,25,25);
+zerocounts=c(0,4,7);
+giniindex=c(0.10614731367766927,0.3942923307396725,0.5440737135650393);
 
 cptable=genreporttable(filelist,labellist,reads,mappedreads);
 print(xtable(cptable, caption = "Summary of comparisons", label = "tab:one",
@@ -236,15 +236,15 @@ The meanings of the columns are as follows.
 The following figure shows the distribution of median-normalized read counts in all samples.
 
 
-<<fig=TRUE,echo=FALSE,width=5.1,height=4.5>>=
-genboxplot("results.count_normalized.txt");
+<<fig=TRUE,echo=FALSE,width=4.7,height=4.5>>=
+genboxplot("results-paired.count_normalized.txt");
 @
 
 The following figure shows the histogram of median-normalized read counts in all samples.
 
 
-<<fig=TRUE,echo=FALSE,width=5.1,height=5.1>>=
-genhistplot("results.count_normalized.txt");
+<<fig=TRUE,echo=FALSE,width=4.7,height=4.7>>=
+genhistplot("results-paired.count_normalized.txt");
 @
 
 
@@ -253,11 +253,11 @@ The following figure shows the first 2 principle components (PCs) from the Princ
 
 
 
-<<fig=TRUE,echo=FALSE,width=7.1,height=5.1>>=
-genpcaplot("results.count_normalized.txt");
+<<fig=TRUE,echo=FALSE,width=6.7,height=4.7>>=
+genpcaplot("results-paired.count_normalized.txt");
 @
 
-<<fig=TRUE,echo=FALSE,width=5.1,height=5.1>>=
+<<fig=TRUE,echo=FALSE,width=4.7,height=4.7>>=
 genpcavar();
 @
 
@@ -266,8 +266,8 @@ genpcavar();
 The following figure shows the sample clustering result.
 
 
-<<fig=TRUE,echo=FALSE,width=5.1,height=5.1>>=
-genclustering("results.count_normalized.txt");
+<<fig=TRUE,echo=FALSE,width=4.7,height=4.7>>=
+genclustering("results-paired.count_normalized.txt");
 @
 
 %__INDIVIDUAL_PAGE__
