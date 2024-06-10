@@ -1,3 +1,72 @@
-INFO  @ Wed, 22 May 2024 14:28:51: Parameters: /Users/giner.g/miniconda3/envs/mageckenv/bin/mageck count -l ../guidelibrary/guide_library.tsv -n results-paired --sample-label base,low,high --fastq ../fastqs/Base1.fastq ../fastqs/Low1.fastq ../fastqs/High1.fastq --fastq-2 ../fastqs/Base2.fastq . ../fastqs/Low2.fastq ../fastqs/High2.fastq 
-INFO  @ Wed, 22 May 2024 14:28:51: Welcome to MAGeCK v0.5.9.5. Command: count 
-ERROR @ Wed, 22 May 2024 14:28:51: The number of paired fastqs must be equal to the number of fastq files provided. 
+INFO  @ Fri, 31 May 2024 14:30:43: Parameters: /Users/giner.g/miniconda3/envs/mageckenv/bin/mageck count -l ../guidelibrary/guide_library.tsv -n results-paired --sample-label base,low,high --fastq ../fastqfiles/Base1.fastq ../fastqfiles/Low1.fastq ../fastqfiles/High1.fastq 
+INFO  @ Fri, 31 May 2024 14:30:43: Welcome to MAGeCK v0.5.9.5. Command: count 
+INFO  @ Fri, 31 May 2024 14:30:43: Loading 25 predefined sgRNAs. 
+WARNING @ Fri, 31 May 2024 14:30:43: There are 0 sgRNAs with duplicated sequences. 
+INFO  @ Fri, 31 May 2024 14:30:43: Parsing FASTQ file ../fastqfiles/Base1.fastq... 
+INFO  @ Fri, 31 May 2024 14:30:43: Determining the trim-5 length of FASTQ file ../fastqfiles/Base1.fastq... 
+INFO  @ Fri, 31 May 2024 14:30:43: Possible gRNA lengths:20 
+INFO  @ Fri, 31 May 2024 14:30:43: Processing 0M reads ... 
+INFO  @ Fri, 31 May 2024 14:30:43: Read length:80 
+INFO  @ Fri, 31 May 2024 14:30:43: Total tested reads: 688, mapped: 688(1.0) 
+INFO  @ Fri, 31 May 2024 14:30:43: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Fri, 31 May 2024 14:30:43: 30	688	1.0 
+INFO  @ Fri, 31 May 2024 14:30:43: Auto determination of trim5 results: 30 
+INFO  @ Fri, 31 May 2024 14:30:43: Possible gRNA lengths:20 
+INFO  @ Fri, 31 May 2024 14:30:43: Processing 0M reads .. 
+INFO  @ Fri, 31 May 2024 14:30:43: Total: 688. 
+INFO  @ Fri, 31 May 2024 14:30:43: Mapped: 688. 
+INFO  @ Fri, 31 May 2024 14:30:43: Parsing FASTQ file ../fastqfiles/Low1.fastq... 
+INFO  @ Fri, 31 May 2024 14:30:43: Determining the trim-5 length of FASTQ file ../fastqfiles/Low1.fastq... 
+INFO  @ Fri, 31 May 2024 14:30:43: Possible gRNA lengths:20 
+INFO  @ Fri, 31 May 2024 14:30:43: Processing 0M reads ... 
+INFO  @ Fri, 31 May 2024 14:30:43: Read length:80 
+INFO  @ Fri, 31 May 2024 14:30:43: Total tested reads: 1730, mapped: 1730(1.0) 
+INFO  @ Fri, 31 May 2024 14:30:43: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Fri, 31 May 2024 14:30:43: 30	1730	1.0 
+INFO  @ Fri, 31 May 2024 14:30:43: Auto determination of trim5 results: 30 
+INFO  @ Fri, 31 May 2024 14:30:43: Possible gRNA lengths:20 
+INFO  @ Fri, 31 May 2024 14:30:43: Processing 0M reads .. 
+INFO  @ Fri, 31 May 2024 14:30:43: Total: 1730. 
+INFO  @ Fri, 31 May 2024 14:30:43: Mapped: 1730. 
+INFO  @ Fri, 31 May 2024 14:30:43: Parsing FASTQ file ../fastqfiles/High1.fastq... 
+INFO  @ Fri, 31 May 2024 14:30:43: Determining the trim-5 length of FASTQ file ../fastqfiles/High1.fastq... 
+INFO  @ Fri, 31 May 2024 14:30:43: Possible gRNA lengths:20 
+INFO  @ Fri, 31 May 2024 14:30:43: Processing 0M reads ... 
+INFO  @ Fri, 31 May 2024 14:30:43: Read length:80 
+INFO  @ Fri, 31 May 2024 14:30:43: Total tested reads: 703, mapped: 703(1.0) 
+INFO  @ Fri, 31 May 2024 14:30:43: --trim-5 test data: (trim_length reads fraction) 
+INFO  @ Fri, 31 May 2024 14:30:43: 30	703	1.0 
+INFO  @ Fri, 31 May 2024 14:30:43: Auto determination of trim5 results: 30 
+INFO  @ Fri, 31 May 2024 14:30:43: Possible gRNA lengths:20 
+INFO  @ Fri, 31 May 2024 14:30:43: Processing 0M reads .. 
+INFO  @ Fri, 31 May 2024 14:30:43: Total: 703. 
+INFO  @ Fri, 31 May 2024 14:30:43: Mapped: 703. 
+DEBUG @ Fri, 31 May 2024 14:30:43: Initial (total) size factor: 1.512112403100775 0.6013487475915221 1.4798482693219535 
+DEBUG @ Fri, 31 May 2024 14:30:43: Median factor: 0.7271199004956896 0.6255001370693278 9.154731942840241 
+INFO  @ Fri, 31 May 2024 14:30:43: Final size factor: 0.7271199004956896 0.6255001370693278 9.154731942840241 
+WARNING @ Fri, 31 May 2024 14:30:43: Some samples have unusually small or large normalization factors (<0.2 or >5). Please double-check with the normalization process. 
+INFO  @ Fri, 31 May 2024 14:30:43: Summary of file ../fastqfiles/Base1.fastq: 
+INFO  @ Fri, 31 May 2024 14:30:43: label	base 
+INFO  @ Fri, 31 May 2024 14:30:43: reads	688 
+INFO  @ Fri, 31 May 2024 14:30:43: mappedreads	688 
+INFO  @ Fri, 31 May 2024 14:30:43: totalsgrnas	25 
+INFO  @ Fri, 31 May 2024 14:30:43: zerosgrnas	0 
+INFO  @ Fri, 31 May 2024 14:30:43: giniindex	0.10614731367766927 
+INFO  @ Fri, 31 May 2024 14:30:43: Summary of file ../fastqfiles/Low1.fastq: 
+INFO  @ Fri, 31 May 2024 14:30:43: label	low 
+INFO  @ Fri, 31 May 2024 14:30:43: reads	1730 
+INFO  @ Fri, 31 May 2024 14:30:43: mappedreads	1730 
+INFO  @ Fri, 31 May 2024 14:30:43: totalsgrnas	25 
+INFO  @ Fri, 31 May 2024 14:30:43: zerosgrnas	4 
+INFO  @ Fri, 31 May 2024 14:30:43: giniindex	0.3942923307396725 
+INFO  @ Fri, 31 May 2024 14:30:43: Summary of file ../fastqfiles/High1.fastq: 
+INFO  @ Fri, 31 May 2024 14:30:43: label	high 
+INFO  @ Fri, 31 May 2024 14:30:43: reads	703 
+INFO  @ Fri, 31 May 2024 14:30:43: mappedreads	703 
+INFO  @ Fri, 31 May 2024 14:30:43: totalsgrnas	25 
+INFO  @ Fri, 31 May 2024 14:30:43: zerosgrnas	7 
+INFO  @ Fri, 31 May 2024 14:30:43: giniindex	0.5440737135650393 
+INFO  @ Fri, 31 May 2024 14:30:43: Loading Rnw template file: /Users/giner.g/miniconda3/envs/mageckenv/lib/python3.10/site-packages/mageck/count_report.Rmd. 
+DEBUG @ Fri, 31 May 2024 14:30:43: Setting up the visualization module... 
+INFO  @ Fri, 31 May 2024 14:30:43: Loading Rnw template file: /Users/giner.g/miniconda3/envs/mageckenv/lib/python3.10/site-packages/mageck/fastq_template.Rnw. 
+DEBUG @ Fri, 31 May 2024 14:30:43: Setting up the visualization module... 
