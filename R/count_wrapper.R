@@ -8,8 +8,8 @@ count <- function(fq1_trimmed,
                   primer = "",
                   mismatches = 1,
                   infer_primer = TRUE,
-                  num_infer = 20,
-                  primer_len = 30) {
+                  num_infer = 10,
+                  primer_len = 20) {
 
   output_dir <- file.path(output_dir, paste0(sample_name, "_count"))
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
