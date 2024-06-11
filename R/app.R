@@ -4,123 +4,94 @@ library(shinythemes)
 library(DT)
 library(refund.shiny)
 library(tidyverse)
-options(shiny.reactlog=TRUE)
+library(glue)
 
-# source("global.R")
-options(shiny.maxRequestSize=100*1024^2)
+options(shiny.reactlog = TRUE)
+options(shiny.maxRequestSize = 100 * 1024^2)
+
 # Define UI ----
-ui <- navbarPage("CuReSPR", id = "main",
-                 theme = shinytheme("cerulean"),
-                 tabsetPanel(
-                   id="inTabset",
-#----------------------- ui Data Upload ------------------------------------
-                 tabPanel("Data Upload",
-                          sidebarLayout(
-                            sidebarPanel(
-                              h3("Details of the experiment"),
-                              helpText("First, define the number of comparison groups.
-                                       Then, upload your fastq files and assign each fastq file to its group.
-                                       Specify any biological or technical replicates, if they exist, and indicate whether the files are paired-end or single-end.
-                                       Review and submit them for the counting step."),
-                              hr(),
-                              h4("Set group numbers"),
-                              helpText("Enter number of groups in your experiment."),
-                              numericInput("num",
-                                           label = "",
-                                           value = 0,
-                                           min = 0),
-                              actionButton("nextnum", "Next"),
-                              conditionalPanel(
-                                condition = "input.nextnum",
-                                hr(),
-                                h4("Assign group names"),
-                                helpText("Enter names for each group."),
-                                uiOutput("groupnames"),
-                                actionButton("nextupload", "Next")
-                              ),
-                            #   conditionalPanel(
-                            #     condition = "input.nextupload",
-                            #     p("Groups are ", textOutput("groups", inline = TRUE))),
+ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
+                 tabsetPanel(id = "inTabset",
+                             #----------------------- ui Data Upload ------------------------------------
+                             tabPanel("Data Upload",
+                                      sidebarLayout(
+                                        sidebarPanel(
+                                          h3("Details of the experiment"),
+                                          helpText("First, define the number of comparison groups.
+                   Then, upload your fastq files and assign each fastq file to its group.
+                   Specify any biological or technical replicates, if they exist, and indicate whether the files are paired-end or single-end.
+                   Review and submit them for the counting step."),
+                                          hr(),
+                                          h4("Set group numbers"),
+                                          helpText("Enter number of groups in your experiment."),
+                                          numericInput("num", label = "", value = 0, min = 0),
+                                          actionButton("nextnum", "Next"),
+                                          conditionalPanel(condition = "input.nextnum > 0",
+                                                           hr(),
+                                                           h4("Assign group names"),
+                                                           helpText("Enter names for each group."),
+                                                           uiOutput("groupnames"),
+                                                           actionButton("nextupload", "Next")
+                                          ),
+                                          conditionalPanel(condition = "input.nextupload > 0",
+                                                           p("Groups are ", textOutput("groups", inline = TRUE))
+                                          )
+                                        ),
+                                        mainPanel(
+                                          conditionalPanel(condition = "input.nextupload > 0",
+                                                           h4("Upload guide RNA library"),
+                                                           fileInput("uploadguides", label = "", accept = c('.tsv', '.csv', '.txt'), multiple = TRUE),
+                                                           hr(),
+                                                           h4("Upload fastq files"),
+                                                           fileInput("upload", label = "", accept = c('.fastq', 'fastq.gz'), multiple = TRUE),
+                                                           checkboxInput("paired", label = "Fastq files are paired-end"),
+                                                           checkboxInput("tech", "There are technical replicates"),
+                                                           checkboxInput("bio", "There are biological replicates"),
+                                                           actionButton("nextdatatable", "Next")
+                                          ),
+                                          conditionalPanel(condition = "input.nextdatatable > 0",
+                                                           hr(),
+                                                           h4("Enter sample details"),
+                                                           helpText("Please enter the details about the samples in the following table."),
+                                                           actionButton("gotocounting", "Go to counting"),
+                                                           DT::dataTableOutput("dataTable"),
+                                                           verbatimTextOutput('sel')
+                                          )
+                                        )
+                                      )
                              ),
-                            mainPanel(
-                              conditionalPanel(
-                                condition = "input.nextupload",
-                                h4("Upload guide RNA library"),
-                                fileInput("uploadguides",
-                                          label = "",
-                                          accept = c('.tsv','.csv','.txt'),
-                                          multiple = TRUE), # This option does not work on older browsers, including Internet Explorer 9 and earlier.
-                                hr(),
-                                h4("Upload fastq files"),
-                                fileInput("upload",
-                                          label = "",
-                                          accept = c('.fastq','fastq.gz'),
-                                          multiple = TRUE), # This option does not work on older browsers, including Internet Explorer 9 and earlier.
-                                checkboxInput("paired", label = "Fastq files are paired-end"),
-                                checkboxInput("tech", "There are technical replicates"),
-                                checkboxInput("bio", "There are biological replicates"),
-                                actionButton("nextdatatable", "Next"),
-                              ),
-                              conditionalPanel(
-                                condition = "input.nextdatatable",
-                                hr(),
-                                h4("Enter sample details"),
-                                helpText("Please enter the details about the samples in the following table."),
-                                DT::dataTableOutput("my_datatable"),
-                                actionButton("gotocounting", "Go to counting"),
-                                )
-                              # actionButton("nextgroups", "Next"),
-                              # conditionalPanel(
-                              #   condition = "input.nextgroups",
-                              #   verbatimTextOutput('sel'),
-                              #   textOutput("result")),
-                            )
-                          )
-                 ),
-#----------------------- ui Creating Count Matrix ---------------------------------------
-tabPanel("Counting",
-         sidebarLayout(
-           sidebarPanel(
-             h4("Select your method of counting"),
-             selectInput("counting",
-               "",
-               choices = c("Rsubread","MAGeCK","WEHI"),
-             ),
-             actionButton("guidecounts", "Get guide counts"),
-           ),
-           mainPanel(
-             conditionalPanel(
-               condition = "input.guidecounts",
-               DT::dataTableOutput("count_table"),
-               downloadButton("download", "Download"),
-             )
-           )
-         )
-),
-#----------------------- ui Pre-proccessing ---------------------------------------
-                 tabPanel("Preproccessing",
-                          h4("testing counting"),
-                          fluidPage(
-                            sidebarPanel(
-                            )
-                          )
-                 ),
-#----------------------- ui Differential Analysis ---------------------------------------
-                 tabPanel("Differential Analysis",
-                          h4("testing counting"),
-                          fluidPage(
-                            sidebarPanel(
-                            )
-                          )
-                 ),
-#----------------------- ui Pathway Analysis ---------------------------------------
-                 tabPanel("Pathway Analysis",
-                          h4("testing counting"),
-                          fluidPage(
-                            sidebarPanel(
-                            )
-                          )
-                 )),
+                             #----------------------- ui Creating Count Matrix ---------------------------------------
+                             tabPanel("Counting",
+                                      sidebarLayout(
+                                        sidebarPanel(
+                                          h4("Select your method of counting"),
+                                          selectInput("counting", "", choices = c("Rsubread", "MAGeCK", "WEHI")),
+                                          actionButton("guidecounts", "Get guide counts")
+                                        ),
+                                        mainPanel(
+                                          conditionalPanel(condition = "input.guidecounts > 0",
+                                                           DT::dataTableOutput("count_table"),
+                                                           downloadButton("download", "Download")
+                                          )
+                                        )
+                                      )
+                             ),
+                             #----------------------- ui Pre-proccessing ---------------------------------------
+                             tabPanel("Preproccessing",
+                                      h4("Testing counting"),
+                                      fluidPage(sidebarPanel())
+                             ),
+                             #----------------------- ui Differential Analysis ---------------------------------------
+                             tabPanel("Differential Analysis",
+                                      h4("Testing counting"),
+                                      fluidPage(sidebarPanel())
+                             ),
+                             #----------------------- ui Pathway Analysis ---------------------------------------
+                             tabPanel("Pathway Analysis",
+                                      h4("Testing counting"),
+                                      fluidPage(sidebarPanel())
+                             )
+                 )
 )
 
 # Define server logic ----
@@ -129,143 +100,90 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "inTabset", selected = "Counting")
   })
 
+  # Reactive value to store the dataframe
+  myData <- reactiveVal(data.frame(Fastq = character(), Size = numeric(), Group = character()))
 
-  #----- Define global reactive variables -----
-  uploaded_data <- reactive({
-    return(input$upload)
-  })
-
-  modified_data <- reactive({
-    req(uploaded_data())
-    data <- uploaded_data()
-    for (i in 1:nrow(data)) {
-      data$group[i] <- as.character(selectInput(paste0("sel", i), "",
-                                                choices = unique(req(values())),
-                                                width = "100px"))
-    }
-    return(data)
-  })
-
-  values <- reactive({
-    unlist(lapply(1:n(),
-                  function(i) {
-                    input[[paste0("group", i)]]}))
-  })
-
-  count_data <- reactive({
-    if (input$counting=="Rsubread"){
-      data <- read.table("/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/rsubread/counts_rsubread.csv", sep = "\t", header = T)
-      datatable(data)
-    }
-    else if (input$counting=="MAGeCK"){
-      data <- read.table("/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/mageck/counts_mageck.csv", sep = "\t", header = T)
-      datatable(data)
-    }
-    else {
-      data <- read.table("/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/wehi/counts_wehi.csv", sep = "\t", header = T)
-      datatable(data)
-    }
-  })
-
-  n <- reactive({
-    input$num
+  # Observe the got to datatable button
+  observeEvent(input$nextdatatable, {
+    test <- sapply(1:nrow(input$upload), function(i) {
+      as.character(selectInput(paste0("sel", i), "", choices = unique(req(values())), width = "100px"))
     })
-
-  m <- reactive({
-    nrow(req(modified_data()))
+    newEntry <- data.frame(Fastq = input$upload[, 1],
+                           Size = input$upload[, 2],
+                           Group = test,
+                           stringsAsFactors = FALSE)
+    myData(rbind(myData(), newEntry))
   })
 
-  #----- Define output variables -----
-  output$groupnames <- renderUI({
-    groupnames <- lapply(1:n(),
-                         function(i) {
-                           textInput(paste0("group", i),
-                                     label = paste0("Group ", i))})
-    do.call(tagList, groupnames)
-  })
-
-  output$groups <- renderText({
-    req(values())
-  })
-
-  output$my_datatable <- renderDT({
-    data <- data.frame(Fastq = modified_data()[,1],
-                       Size = modified_data()[,2],
-                       Group = modified_data()[["group"]])
-    if(as.logical(input[['paired']])){
-      data <- data %>% add_column(FastqPair = rep(1,nrow(modified_data())))
-      if(
-        !as.logical(input[['tech']])
-        & !as.logical(input[['bio']])
-      ){
-        v <- reactive({data})
-      }
-
-      else if (
-        as.logical(input[['tech']])
-        & !as.logical(input[['bio']])
-      ){
-        v <- reactive({data %>% add_column(TechRep = rep(1,nrow(modified_data())))})
-      }
-
-      else if(
-        !as.logical(input[['tech']])
-        & as.logical(input[['bio']])
-      ){
-        v <- reactive({data %>% add_column(BioRep = rep(1, nrow(modified_data())))})
-      }
-
-      else{
-        v <- reactive({data %>%
-            add_column(TechRep = rep(1, nrow(modified_data()))) %>%
-            add_column(BioRep = rep(1, nrow(modified_data())))
-        })
-      }
+  # Determine the base data, including FastqPair if paired input is TRUE
+  base_data <- reactive({
+    if (as.logical(input[['paired']])) {
+      myData() %>% add_column(FastqPair = rep(1, nrow(myData())))
+    } else {
+      myData()
     }
+  })
 
-    else {
-      if(
-        !as.logical(input[['tech']])
-        & !as.logical(input[['bio']])
-      ){
-        v <- reactive({data})
-      }
-
-      else if (
-        as.logical(input[['tech']])
-        & !as.logical(input[['bio']])
-      ){
-        v <- reactive({data %>% add_column(TechRep = rep(1,nrow(modified_data())))})
-      }
-
-      else if(
-        !as.logical(input[['tech']])
-        & as.logical(input[['bio']])
-      ){
-        v <- reactive({data %>% add_column(BioRep = rep(1, nrow(modified_data())))})
-      }
-
-      else{
-        v <- reactive({data %>%
-            add_column(TechRep = rep(1, nrow(modified_data()))) %>%
-            add_column(BioRep = rep(1, nrow(modified_data())))
-        })
-      }
+  # Add columns based on tech and bio inputs
+  v <- reactive({
+    result <- base_data()
+    if (as.logical(input[['tech']])) {
+      result <- result %>% add_column(TechRep = rep(1, nrow(myData())))
     }
+    if (as.logical(input[['bio']])) {
+      result <- result %>% add_column(BioRep = rep(1, nrow(myData())))
+    }
+    result
+  })
 
-    DT::datatable(
-      v(),
-      editable = TRUE,
-      escape = FALSE,
-      selection = 'none',
-      options = list(dom = 't', paging = FALSE, ordering = FALSE),
-      callback = JS("table.rows().every(function(i, tab, row) {
+  # Render the dataframe as a table
+  output$dataTable <- DT::renderDataTable(
+    v(),
+    editable = TRUE,
+    escape = FALSE,
+    selection = 'none',
+    server = FALSE,
+    options = list(dom = 't', paging = FALSE, ordering = FALSE),
+    callback = JS("table.rows().every(function(i, tab, row) {
         var $this = $(this.node());
         $this.attr('id', this.data()[0]);
         $this.addClass('shiny-input-container');
       });
       Shiny.unbindAll(table.table().node());
-      Shiny.bindAll(table.table().node());"))
+      Shiny.bindAll(table.table().node());")
+  )
+
+  output$sel <- renderPrint({
+    str(sapply(1:nrow(myData()), function(i) input[[glue("sel{i}")]]))
+  })
+
+  values <- reactive({
+    unlist(lapply(1:n(), function(i) input[[paste0("group", i)]]))
+  })
+
+  n <- reactive({
+    input$num
+  })
+
+  count_data <- reactive({
+    file_path <- switch(input$counting,
+                        "Rsubread" = "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/rsubread/counts_rsubread.csv",
+                        "MAGeCK" = "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/mageck/counts_mageck.csv",
+                        "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/wehi/counts_wehi.csv")
+    data <- read.table(file_path, sep = "\t", header = TRUE)
+    datatable(data)
+  })
+
+  # Define output variables
+  output$groupnames <- renderUI({
+    groupnames <- lapply(1:n(), function(i) {
+      textInput(paste0("group", i), label = paste0("Group ", i))
+    })
+    do.call(tagList, groupnames)
+  })
+
+  output$groups <- renderText({
+    req(values())
   })
 
   output$count_table <- renderDT({
@@ -280,21 +198,7 @@ server <- function(input, output, session) {
       vroom::vroom_write(count_data(), file)
     }
   )
-
-#   output$sel = renderPrint({
-#     str(sapply(1:m(), function(i) input[[paste0("sel", i)]]))
-#   })
-# #
-#   observe({
-#     print(m())
-#   })
-#
-#     output$result <- renderText({
-#       paste("You chose", req(input$sel1))
-#     })
 }
 
 # Run the app ----
 shinyApp(ui = ui, server = server)
-
-
