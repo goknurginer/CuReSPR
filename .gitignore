@@ -4,6 +4,7 @@
 .httr-oauth
 .DS_Store
 .quarto
+# folders
 fastqs/
 bams/
 fastq_files/
@@ -11,6 +12,10 @@ index/
 RData/
 denemeler/
 wehi_marek_counting/
+countmatrices/
+datasets/T8/
+datasets/Tox/
+# R files
 R/steps_2_create_pkg.R
 R/apptest.R
 R/appglue.R
@@ -18,7 +23,5 @@ R/countingT8.R
 R/counting.R
 R/countingbase.R
 R/countingall.R
-countmatrices/
-datasets/T8/
-datasets/Tox/
 R/shinyselect_michael.R
+R/app_v1.R
