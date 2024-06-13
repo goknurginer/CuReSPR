@@ -4,7 +4,6 @@ library(shinythemes)
 library(DT)
 library(refund.shiny)
 library(tidyverse)
-library(glue)
 
 options(shiny.reactlog = TRUE)
 options(shiny.maxRequestSize = 100 * 1024^2)
@@ -66,12 +65,11 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                                         sidebarPanel(
                                           h4("Select your method of counting"),
                                           selectInput("counting", "", choices = c("Rsubread", "MAGeCK", "WEHI")),
-                                          actionButton("guidecounts", "Get guide counts")
+                                          actionButton("guidecounts", "Get the guide counts"),
                                         ),
                                         mainPanel(
                                           conditionalPanel(condition = "input.guidecounts > 0",
-                                                           DT::dataTableOutput("count_table"),
-                                                           downloadButton("download", "Download")
+                                                           uiOutput("dynamic_ui")  # Placeholder for dynamic UI components
                                           )
                                         )
                                       )
@@ -96,8 +94,31 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
 
 # Define server logic ----
 server <- function(input, output, session) {
+  # Reactive value to store the state of button click
+  button_clicked <- reactiveVal(FALSE)
+
+  # Observe counting dropdown change and reset button click state
+  observeEvent(input$counting, {
+    button_clicked(FALSE)
+  })
+
+  # Observe guidecounts button click and set reactive value to TRUE
+  observeEvent(input$guidecounts, {
+    button_clicked(TRUE)
+  })
+
   observeEvent(input$gotocounting, {
     updateTabsetPanel(session, "inTabset", selected = "Counting")
+  })
+
+  # Render the dynamic UI based on button click state
+  output$dynamic_ui <- renderUI({
+    if (button_clicked()) {
+      tagList(
+        DT::dataTableOutput("count_table"),
+        downloadButton("download", "Download")
+      )
+    }
   })
 
   # Reactive value to store the dataframe
@@ -154,7 +175,7 @@ server <- function(input, output, session) {
   )
 
   output$sel <- renderPrint({
-    str(sapply(1:nrow(myData()), function(i) input[[glue("sel{i}")]]))
+    str(sapply(1:nrow(myData()), function(i) input[[paste0("sel",i)]]))
   })
 
   values <- reactive({
@@ -187,14 +208,16 @@ server <- function(input, output, session) {
   })
 
   output$count_table <- renderDT({
+    req(button_clicked())  # Ensure this runs only after button is clicked
     count_data()
   })
 
   output$download <- downloadHandler(
     filename = function() {
-      paste0(input$counting, ".csv")
+      paste0(input$counting, "-guide-counts-", Sys.Date(), ".csv")
     },
     content = function(file) {
+      req(button_clicked())  # Ensure this runs only after button is clicked
       vroom::vroom_write(count_data(), file)
     }
   )
