@@ -11,10 +11,8 @@ options(shiny.maxRequestSize = 100 * 1024^2)
 path <- "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8"
 
 # Source module scripts
-source("../modules/data_upload_ui.R")
-source("../modules/data_upload_server.R")
-source("../modules/counting_ui.R")
-source("../modules/counting_server.R")
+source("../modules/data_upload.R")
+source("../modules/counting.R")
 
 # Define UI
 ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
