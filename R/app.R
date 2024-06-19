@@ -4,6 +4,7 @@ library(shinythemes)
 library(DT)
 library(refund.shiny)
 library(tidyverse)
+library(readr)
 
 options(shiny.reactlog = TRUE)
 options(shiny.maxRequestSize = 100 * 1024^2)

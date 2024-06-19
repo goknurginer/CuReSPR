@@ -133,31 +133,50 @@ data_upload_server <- function(id, parent_session) {
 
     output$dataTableCounts <- DT::renderDataTable({
       req(input$uploadcounts)
+
       # Extract file extension
       file_ext <- tools::file_ext(input$uploadcounts$name)
 
-      # Determine separator based on file extension
-      sep <- switch(file_ext,
-                    "csv" = ",",
-                    "tsv" = "\t",
-                    "txt" = " ",
-                    stop("Unsupported file type"))
-      df <- read.table(input$uploadcounts$datapath, check.names = FALSE, sep = sep) # Ensure column names are read correctly
+      # Read file based on extension and detect separator if necessary
+      df <- switch(file_ext,
+                   "csv" = read.table(input$uploadcounts$datapath, check.names = FALSE, sep = ","),
+                   "tsv" = read.table(input$uploadcounts$datapath, check.names = FALSE, sep = "\t"),
+                   "txt" = {
+                     # Detect separator for .txt files
+                     first_line <- readLines(input$uploadcounts$datapath, n = 1)
+                     if (grepl("\t", first_line)) {
+                       read.table(input$uploadcounts$datapath, check.names = FALSE, sep = "\t")
+                     } else {
+                       read.table(input$uploadcounts$datapath, check.names = FALSE, sep = " ")
+                     }
+                   },
+                   stop("Unsupported file type"))
+
       datatable(df)
     })
 
+
     output$dataTableGuides <- DT::renderDataTable({
       req(input$uploadguides)
+
       # Extract file extension
       file_ext <- tools::file_ext(input$uploadguides$name)
 
-      # Determine separator based on file extension
-      sep <- switch(file_ext,
-                    "csv" = ",",
-                    "tsv" = "\t",
-                    "txt" = " ",
-                    stop("Unsupported file type"))
-      df <- read.table(input$uploadguides$datapath, check.names = FALSE, sep = sep) # Ensure column names are read correctly
+      # Read file based on extension and detect separator if necessary
+      df <- switch(file_ext,
+                   "csv" = read.table(input$uploadguides$datapath, check.names = FALSE, sep = ","),
+                   "tsv" = read.table(input$uploadguides$datapath, check.names = FALSE, sep = "\t"),
+                   "txt" = {
+                     # Detect separator for .txt files
+                     first_line <- readLines(input$uploadguides$datapath, n = 1)
+                     if (grepl("\t", first_line)) {
+                       read.table(input$uploadguides$datapath, check.names = FALSE, sep = "\t")
+                     } else {
+                       read.table(input$uploadguides$datapath, check.names = FALSE, sep = " ")
+                     }
+                   },
+                   stop("Unsupported file type"))
+      colnames(df) <- c("sgRNA_ID","sgRNA_sequence", "gene_ID")
       datatable(df)
     })
 
