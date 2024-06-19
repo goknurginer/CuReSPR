@@ -43,7 +43,7 @@ counting_server <- function(id, path) {
 
     count_data <- reactive({
       file_path <- switch(input$counting,
-                          "Rsubread" = paste0(path,"/rsubread/counts_rsubread.csv"),
+                          "Rsubread" = paste0(path,"/rsubread/counts_rsubread.tsv"),
                           "MAGeCK" = paste0(path,"/mageck/counts_mageck.csv"),
                           "WEHI" = paste0(path,"/wehi/counts_wehi.csv"))
       data <- read.table(file_path, sep = "\t", header = TRUE)
