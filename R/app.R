@@ -9,8 +9,6 @@ library(readr)
 options(shiny.reactlog = TRUE)
 options(shiny.maxRequestSize = 100 * 1024^2)
 
-path <- "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8"
-
 # Source module scripts
 source("../modules/data_upload.R")
 source("../modules/counting.R")
@@ -29,7 +27,7 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
 # Define server logic
 server <- function(input, output, session) {
   data_upload_server("data_upload", session)
-  counting_server("counting", path = path)
+  counting_server("counting")
 }
 
 # Run the app

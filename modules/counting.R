@@ -43,9 +43,9 @@ counting_server <- function(id, path) {
 
     count_data <- reactive({
       file_path <- switch(input$counting,
-                          "Rsubread" = paste0(path,"/rsubread/counts_rsubread.tsv"),
-                          "MAGeCK" = paste0(path,"/mageck/counts_mageck.csv"),
-                          "WEHI" = paste0(path,"/wehi/counts_wehi.csv"))
+                          "Rsubread" = "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/rsubread/counts_rsubread.tsv",
+                          "MAGeCK" = "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/mageck/counts_mageck.csv",
+                          "WEHI" = "/Users/giner.g/Documents/Github/CuReSPR/datasets/T8/wehi/counts_wehi.csv")
       data <- read.table(file_path, sep = "\t", header = TRUE)
       datatable(data)
     })
