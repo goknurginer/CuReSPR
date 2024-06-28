@@ -26,8 +26,9 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
 
 # Define server logic
 server <- function(input, output, session) {
-  data_upload_server("data_upload", session)
-  counting_server("counting")
+  data_upload_input <- data_upload_server("data_upload", session)
+  # data_upload_server("data_upload", session)
+  counting_server("counting", data_upload_input)
 }
 
 # Run the app

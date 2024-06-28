@@ -77,10 +77,16 @@ data_upload_ui <- function(id) {
 }
 
 # Server Component----
-
 data_upload_server <- function(id, parent_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    # Reactive values to store the uploaded guides and the view button click event
+    data_upload_input <- reactiveValues(uploadguides = NULL, viewguides = NULL)
+
+    observeEvent(input$viewguides, {
+      data_upload_input$uploadguides <- input$uploadguides
+      data_upload_input$viewguides <- TRUE
+    })
 
     myData <- reactiveVal(data.frame(Fastq = character(), Size = numeric(), Group = character()))
 
@@ -210,5 +216,8 @@ data_upload_server <- function(id, parent_session) {
     observeEvent(input$gotocounting, {
       updateTabsetPanel(parent_session, "inTabset", selected = "Counting")
     })
+
+    # Return reactive values
+    return(data_upload_input)
   })
 }
