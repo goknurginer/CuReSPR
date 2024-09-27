@@ -7,6 +7,48 @@ library(tidyverse)
 library(readr)
 library(edgeR)
 
+# Define a function to read files and render DataTable
+read_file_and_render <- function(file_input) {
+  req(file_input)  # Ensure the file is uploaded
+
+  # Extract file extension
+  file_ext <- tools::file_ext(file_input$name)
+
+  # Read file based on extension and detect separator if necessary
+  df <- switch(file_ext,
+               "csv" = read.table(file_input$datapath, check.names = FALSE, sep = ","),
+               "tsv" = read.table(file_input$datapath, check.names = FALSE, sep = "\t"),
+               "txt" = {
+                 # Detect separator for .txt files
+                 first_line <- readLines(file_input$datapath, n = 1)
+                 if (grepl("\t", first_line)) {
+                   read.table(file_input$datapath, check.names = FALSE, sep = "\t")
+                 } else {
+                   read.table(file_input$datapath, check.names = FALSE, sep = " ")
+                 }
+               },
+               stop("Unsupported file type"))
+
+  datatable(df)  # Render the DataTable
+}
+
+# Define a function to read Fastq files and prepare for display
+read_fastq_file <- function(fastq_input) {
+  req(fastq_input)
+
+  # Read the Fastq file. Assuming a simple extraction for demonstration.
+  fastq_lines <- readLines(fastq_input$datapath)
+  fastq_data <- data.frame(
+    ID = fastq_lines[seq(1, length(fastq_lines), by = 4)],
+    Sequence = fastq_lines[seq(2, length(fastq_lines), by = 4)],
+    Plus = fastq_lines[seq(3, length(fastq_lines), by = 4)],
+    Quality = fastq_lines[seq(4, length(fastq_lines), by = 4)],
+    stringsAsFactors = FALSE
+  )
+
+  datatable(fastq_data)
+}
+
 # Define UI
 ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                  tabsetPanel(id = "inTabset",
@@ -143,7 +185,7 @@ server <- function(input, output, session) {
   observeEvent(input$viewfiles, {
     req(input$upload)
     test <- sapply(1:nrow(input$upload), function(i) {
-      as.character(selectInput(paste0("sel", i), "", choices = unique(req(values())), width = "100px"))
+      as.character(selectInput(paste0("sel", i), "", choices = unique(req(myData()$Group)), width = "100px"))
     })
     newEntry <- data.frame(Fastq = input$upload[, 1],
                            Size = input$upload[, 2],
@@ -187,100 +229,47 @@ server <- function(input, output, session) {
         Shiny.bindAll(table.table().node());")
   )
 
-  output$dataTableCounts <- DT::renderDataTable({
-    req(input$uploadcounts)
-
-    # Extract file extension
-    file_ext <- tools::file_ext(input$uploadcounts$name)
-
-    # Read file based on extension and detect separator if necessary
-    df <- switch(file_ext,
-                 "csv" = read.table(input$uploadcounts$datapath, check.names = FALSE, sep = ","),
-                 "tsv" = read.table(input$uploadcounts$datapath, check.names = FALSE, sep = "\t"),
-                 "txt" = {
-                   # Detect separator for .txt files
-                   first_line <- readLines(input$uploadcounts$datapath, n = 1)
-                   if (grepl("\t", first_line)) {
-                     read.table(input$uploadcounts$datapath, check.names = FALSE, sep = "\t")
-                   } else {
-                     read.table(input$uploadcounts$datapath, check.names = FALSE, sep = " ")
-                   }
-                 },
-                 stop("Unsupported file type"))
-
-    datatable(df)
+  # Render DataTables for uploaded files
+  observeEvent(input$viewcounts, {
+    output$dataTableCounts <- DT::renderDataTable({
+      read_file_and_render(input$uploadcounts)
+    })
   })
 
-  output$dataTableSamples <- DT::renderDataTable({
-    req(input$uploadsamples)
-
-    # Extract file extension
-    file_ext <- tools::file_ext(input$uploadsamples$name)
-
-    # Read file based on extension and detect separator if necessary
-    df <- switch(file_ext,
-                 "csv" = read.table(input$uploadsamples$datapath, check.names = FALSE, sep = ","),
-                 "tsv" = read.table(input$uploadsamples$datapath, check.names = FALSE, sep = "\t"),
-                 "txt" = {
-                   # Detect separator for .txt files
-                   first_line <- readLines(input$uploadsamples$datapath, n = 1)
-                   if (grepl("\t", first_line)) {
-                     read.table(input$uploadsamples$datapath, check.names = FALSE, sep = "\t")
-                   } else {
-                     read.table(input$uploadsamples$datapath, check.names = FALSE, sep = " ")
-                   }
-                 },
-                 stop("Unsupported file type"))
-
-    datatable(df)
+  observeEvent(input$viewsamples, {
+    output$dataTableSamples <- DT::renderDataTable({
+      read_file_and_render(input$uploadsamples)
+    })
   })
 
-  output$dataTableGuides <- DT::renderDataTable({
-    req(input$uploadguides)
+  observeEvent(input$viewguides, {
+    output$dataTableGuides <- DT::renderDataTable({
+      read_file_and_render(input$uploadguides)
+    })
+  })
 
-    # Extract file extension
-    file_ext <- tools::file_ext(input$uploadguides$name)
-
-    # Read file based on extension and detect separator if necessary
-    df <- switch(file_ext,
-                 "csv" = read.table(input$uploadguides$datapath, check.names = FALSE, sep = ","),
-                 "tsv" = read.table(input$uploadguides$datapath, check.names = FALSE, sep = "\t"),
-                 "txt" = {
-                   # Detect separator for .txt files
-                   first_line <- readLines(input$uploadguides$datapath, n = 1)
-                   if (grepl("\t", first_line)) {
-                     read.table(input$uploadguides$datapath, check.names = FALSE, sep = "\t")
-                   } else {
-                     read.table(input$uploadguides$datapath, check.names = FALSE, sep = " ")
-                   }
-                 },
-                 stop("Unsupported file type"))
-    colnames(df) <- c("sgRNA_ID", "sgRNA_sequence", "gene_ID")
-    datatable(df)
+  observeEvent(input$viewfiles, {
+    output$dataTableFastq <- DT::renderDataTable({
+      read_fastq_file(input$upload)
+    })
   })
 
   output$sel <- renderPrint({
     str(sapply(1:nrow(myData()), function(i) input[[paste0("sel", i)]]))
   })
 
-  values <- reactive({
-    unlist(lapply(1:n(), function(i) input[[paste0("group", i)]]))
-  })
-
-  n <- reactive({
-    input$num
-  })
-
+  # Handling dynamic UI for group names
   output$groupnames <- renderUI({
-    groupnames <- lapply(1:n(), function(i) {
+    groupnames <- lapply(1:input$num, function(i) {
       textInput(paste0("group", i), label = paste0("Group ", i))
     })
     do.call(tagList, groupnames)
   })
 
   output$groups <- renderText({
-    req(values())
-    paste("Groups are:", paste(values(), collapse = ", "))
+    req(input$num)
+    group_values <- sapply(1:input$num, function(i) input[[paste0("group", i)]])
+    paste("Groups are:", paste(group_values, collapse = ", "))
   })
 
   observeEvent(input$gotocounting, {
