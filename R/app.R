@@ -7,6 +7,9 @@ library(tidyverse)
 library(readr)
 library(edgeR)
 
+# Set maximum upload size to 1 GB
+options(shiny.maxRequestSize = 1000 * 1024^2)
+
 # Define a function to read files and render DataTable
 read_file_and_render <- function(file_input) {
   req(file_input)  # Ensure the file is uploaded
@@ -16,37 +19,24 @@ read_file_and_render <- function(file_input) {
 
   # Read file based on extension and detect separator if necessary
   df <- switch(file_ext,
-               "csv" = read.table(file_input$datapath, check.names = FALSE, sep = ","),
-               "tsv" = read.table(file_input$datapath, check.names = FALSE, sep = "\t"),
+               "csv" = read.table(file_input$datapath, check.names = FALSE, sep = ",", header = TRUE),
+               "tsv" = read.table(file_input$datapath, check.names = FALSE, sep = "\t", header = TRUE),
                "txt" = {
                  # Detect separator for .txt files
                  first_line <- readLines(file_input$datapath, n = 1)
                  if (grepl("\t", first_line)) {
-                   read.table(file_input$datapath, check.names = FALSE, sep = "\t")
+                   read.table(file_input$datapath, check.names = FALSE, sep = "\t", header = TRUE)
                  } else {
-                   read.table(file_input$datapath, check.names = FALSE, sep = " ")
+                   read.table(file_input$datapath, check.names = FALSE, sep = " ", header = TRUE)
                  }
                },
                stop("Unsupported file type"))
 
-  datatable(df)  # Render the DataTable
-}
-
-# Define a function to read Fastq files and prepare for display
-read_fastq_file <- function(fastq_input) {
-  req(fastq_input)
-
-  # Read the Fastq file. Assuming a simple extraction for demonstration.
-  fastq_lines <- readLines(fastq_input$datapath)
-  fastq_data <- data.frame(
-    ID = fastq_lines[seq(1, length(fastq_lines), by = 4)],
-    Sequence = fastq_lines[seq(2, length(fastq_lines), by = 4)],
-    Plus = fastq_lines[seq(3, length(fastq_lines), by = 4)],
-    Quality = fastq_lines[seq(4, length(fastq_lines), by = 4)],
-    stringsAsFactors = FALSE
-  )
-
-  datatable(fastq_data)
+  # Set column names for the guide library if applicable
+  if (file_ext %in% c("tsv", "csv", "txt")) {
+    #colnames(df) <- c("sgRNA_ID", "sgRNA_sequence", "gene_ID")  # Assigning appropriate names
+  }
+  df
 }
 
 # Define UI
@@ -100,11 +90,7 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                                                            ),
                                                            conditionalPanel(condition = "input.count_matrix_yes_no == 'no'",
                                                                             h4("Upload fastq files"),
-                                                                            fileInput("upload", label = "", accept = c('.fastq', 'fastq.gz'), multiple = TRUE),
-                                                                            checkboxInput("paired", label = "Fastq files are paired-end"),
-                                                                            checkboxInput("tech", "There are technical replicates"),
-                                                                            checkboxInput("bio", "There are biological replicates"),
-                                                                            actionButton("viewfiles", "View file details")
+                                                                            fileInput("upload", label = "", accept = c('.fastq', 'fastq.gz'), multiple = TRUE)
                                                            )
                                           )
                                         ),
@@ -116,16 +102,14 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                                           ),
                                           conditionalPanel(condition = "input.viewsamples > 0",
                                                            hr(),
-                                                           h4("Sample Information"),
+                                                           h4("Sample information"),
                                                            DT::dataTableOutput("dataTableSamples")
                                           ),
-                                          conditionalPanel(condition = "input.count_matrix_yes_no == 'no' && input.viewfiles > 0",
+                                          conditionalPanel(condition = "input.count_matrix_yes_no == 'no'",
                                                            hr(),
-                                                           h4("Enter sample details"),
-                                                           helpText("Please enter the details about the samples in the following table."),
-                                                           DT::dataTableOutput("dataTableFiles"),
-                                                           verbatimTextOutput('sel'),
-                                                           actionButton("gotocounting", "Go to counting")
+                                                           h4("Here are the uploaded Fastq files"),
+                                                           verbatimTextOutput("fastqFilesOutput"),
+                                                           actionButton("gotocountingfastq", "Go to Counting")  # Button to go to counting
                                           ),
                                           conditionalPanel(condition = "input.count_matrix_yes_no == 'yes' && input.viewcounts > 0",
                                                            hr(),
@@ -157,7 +141,8 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                                           actionButton("create_dgelist", "Create DGEList")
                                         ),
                                         mainPanel(
-                                          textOutput("dgelist_status")  # Display status for DGEList creation
+                                          textOutput("dgelist_status"),  # Display status for DGEList creation
+                                          verbatimTextOutput("dge_list_output")  # Output for DGEList
                                         )
                                       )
                              ),
@@ -168,94 +153,39 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
 
 # Define server logic
 server <- function(input, output, session) {
-  # Reactive values to store the uploaded guides and sample information
-  data_upload_output <- reactiveValues(uploadguides = NULL, viewguides = NULL)
-  observeEvent(input$viewguides, {
-    data_upload_output$uploadguides <- input$uploadguides
-    data_upload_output$viewguides <- TRUE
-  })
 
-  sample_upload_output <- reactiveValues(uploadsamples = NULL, viewsamples = NULL)
-  observeEvent(input$viewsamples, {
-    sample_upload_output$uploadsamples <- input$uploadsamples
-    sample_upload_output$viewsamples <- TRUE
-  })
+  # Reactive value to track Fastq file upload
+  fastq_uploaded <- reactiveVal(FALSE)
 
-  myData <- reactiveVal(data.frame(Fastq = character(), Size = numeric(), Group = character()))
-  observeEvent(input$viewfiles, {
+  # Fastq file upload output
+  output$fastqFilesOutput <- renderPrint({
     req(input$upload)
-    test <- sapply(1:nrow(input$upload), function(i) {
-      as.character(selectInput(paste0("sel", i), "", choices = unique(req(myData()$Group)), width = "100px"))
-    })
-    newEntry <- data.frame(Fastq = input$upload[, 1],
-                           Size = input$upload[, 2],
-                           Group = test,
-                           stringsAsFactors = FALSE)
-    myData(newEntry)
+    fastq_file_names <- input$upload$name
+    fastq_uploaded(TRUE)  # Mark Fastq files as uploaded
+    paste("Uploaded Fastq files:", paste(fastq_file_names, collapse = ", "))
   })
-
-  base_data <- reactive({
-    if (as.logical(input$paired)) {
-      myData() %>% add_column(FastqPair = rep(1, nrow(myData())))
-    } else {
-      myData()
-    }
-  })
-
-  v <- reactive({
-    result <- base_data()
-    if (as.logical(input$tech)) {
-      result <- result %>% add_column(TechRep = rep(1, nrow(myData())))
-    }
-    if (as.logical(input$bio)) {
-      result <- result %>% add_column(BioRep = rep(1, nrow(myData())))
-    }
-    result
-  })
-
-  output$dataTableFiles <- DT::renderDataTable(
-    v(),
-    editable = TRUE,
-    escape = FALSE,
-    selection = 'none',
-    server = FALSE,
-    options = list(dom = 't', paging = FALSE, ordering = FALSE),
-    callback = JS("table.rows().every(function(i, tab, row) {
-            var $this = $(this.node());
-            $this.attr('id', this.data()[0]);
-            $this.addClass('shiny-input-container');
-        });
-        Shiny.unbindAll(table.table().node());
-        Shiny.bindAll(table.table().node());")
-  )
 
   # Render DataTables for uploaded files
+
   observeEvent(input$viewcounts, {
     output$dataTableCounts <- DT::renderDataTable({
-      read_file_and_render(input$uploadcounts)
+      req(input$uploadcounts)  # Ensure a file is uploaded
+      datatable(read_file_and_render(input$uploadcounts))
     })
   })
 
   observeEvent(input$viewsamples, {
     output$dataTableSamples <- DT::renderDataTable({
-      read_file_and_render(input$uploadsamples)
+      req(input$uploadsamples)  # Ensure a file is uploaded
+      datatable(read_file_and_render(input$uploadsamples))
     })
   })
 
   observeEvent(input$viewguides, {
     output$dataTableGuides <- DT::renderDataTable({
-      read_file_and_render(input$uploadguides)
+      req(input$uploadguides)  # Ensure a file is uploaded
+      datatable(read_file_and_render(input$uploadguides))
     })
-  })
-
-  observeEvent(input$viewfiles, {
-    output$dataTableFastq <- DT::renderDataTable({
-      read_fastq_file(input$upload)
-    })
-  })
-
-  output$sel <- renderPrint({
-    str(sapply(1:nrow(myData()), function(i) input[[paste0("sel", i)]]))
   })
 
   # Handling dynamic UI for group names
@@ -272,8 +202,8 @@ server <- function(input, output, session) {
     paste("Groups are:", paste(group_values, collapse = ", "))
   })
 
-  observeEvent(input$gotocounting, {
-    updateTabsetPanel(session, "inTabset", selected = "Counting")
+  observeEvent(input$gotocountingfastq, {
+    updateTabsetPanel(session, "inTabset", selected = "Counting")  # Navigate to Counting tab after Fastq files loaded
   })
 
   observeEvent(input$gotopreprocessing, {
@@ -283,10 +213,9 @@ server <- function(input, output, session) {
   # Counting functionality
   observeEvent(input$guidecounts, {
     output$status <- renderText("Calculating guide counts...")
-    req(data_upload_output$uploadguides)
+    req(input$uploadguides)
 
-    # Here you would add logic for the counting process
-    # This is just a placeholder to show you might generate counts
+    # This is just a placeholder. Add logic for the counting process with Rsubread, MAGeCK, etc. later.
     count_data <- data.frame(
       sgRNA_ID = c("sgRNA1", "sgRNA2"),
       Count = c(100, 200)  # Sample count data; replace with actual counting logic
@@ -324,17 +253,23 @@ server <- function(input, output, session) {
     }
   )
 
-  # Status for DGEList creation
-  output$dgelist_status <- renderText({
-    req(input$create_dgelist)  # Ensure the button was clicked
-    if (is.null(data_upload_output$uploadcounts) ||
-        is.null(data_upload_output$uploadguides) ||
-        is.null(data_upload_output$uploadsamples)) {
-      return("Please ensure all required files are uploaded.")
-    }
+  # DGEList creation
+  observeEvent(input$create_dgelist, {
+    req(input$uploadcounts, input$uploadsamples)  # Ensure necessary files are uploaded
 
-    # Here you would implement the DGEList creation logic
-    return("DGEList created successfully!")  # Update this to reflect actual status
+    # Create the DGEList object
+    dge <- DGEList(counts = read_file_and_render(input$uploadcounts)[,-c(1:2)],
+                   genes = read_file_and_render(input$uploadguides),
+                   samples = read_file_and_render(input$uploadsamples))
+    dge$samples$group <- dge$samples$Groups
+    dge$samples$Groups <- NULL
+    rownames(dge) <- read_file_and_render(input$uploadcounts)[,1]
+    # Print the DGEList output in the Preprocessing tab
+    output$dge_list_output <- renderPrint({
+      dge  # Display the DGEList object
+    })
+
+    output$dgelist_status <- renderText("DGEList created successfully!")
   })
 }
 
