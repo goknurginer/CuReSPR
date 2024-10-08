@@ -1,43 +1,6 @@
-library(shiny)
-library(shinyWidgets)
-library(shinythemes)
-library(DT)
-library(refund.shiny)
-library(tidyverse)
-library(readr)
-library(edgeR)
-
-# Set maximum upload size to 1 GB
-options(shiny.maxRequestSize = 1000 * 1024^2)
-
-# Define a function to read files and render DataTable
-read_file_and_render <- function(file_input) {
-  req(file_input)  # Ensure the file is uploaded
-
-  # Extract file extension
-  file_ext <- tools::file_ext(file_input$name)
-
-  # Read file based on extension and detect separator if necessary
-  df <- switch(file_ext,
-               "csv" = read.table(file_input$datapath, check.names = FALSE, sep = ",", header = TRUE),
-               "tsv" = read.table(file_input$datapath, check.names = FALSE, sep = "\t", header = TRUE),
-               "txt" = {
-                 # Detect separator for .txt files
-                 first_line <- readLines(file_input$datapath, n = 1)
-                 if (grepl("\t", first_line)) {
-                   read.table(file_input$datapath, check.names = FALSE, sep = "\t", header = TRUE)
-                 } else {
-                   read.table(file_input$datapath, check.names = FALSE, sep = " ", header = TRUE)
-                 }
-               },
-               stop("Unsupported file type"))
-
-  # Set column names for the guide library if applicable
-  if (file_ext %in% c("tsv", "csv", "txt")) {
-    #colnames(df) <- c("sgRNA_ID", "sgRNA_sequence", "gene_ID")  # Assigning appropriate names
-  }
-  df
-}
+setwd("/Users/giner.g/Documents/Github/CuReSPR/R")
+source("global.R")
+global_dge <- NULL
 
 # Define UI
 ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
@@ -123,7 +86,7 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                              tabPanel("Counting",
                                       sidebarLayout(
                                         sidebarPanel(
-                                          h4("Select your method of counting"),
+                                          h4("Select method of counting"),
                                           selectInput("method", "", choices = c("Rsubread", "MAGeCK", "WEHI")),
                                           actionButton("guidecounts", "Get the guide counts")
                                         ),
@@ -137,12 +100,35 @@ ui <- navbarPage("CuReSPR", id = "main", theme = shinytheme("cerulean"),
                              tabPanel("Preprocessing",
                                       sidebarLayout(
                                         sidebarPanel(
-                                          h4("Preprocessing Counts"),
-                                          actionButton("create_dgelist", "Create DGEList")
+                                          h3("Select preprocessing options"),
+                                          h4("Select software for analysing your screen"),
+                                          selectInput("software",
+                                                      "",
+                                                      choices = c("", "MAGeCK", "edgeR"),
+                                                      selected = NULL),
+                                          conditionalPanel(
+                                            condition = "input.software == 'edgeR'",
+                                            h3("Create edgeR data object"),
+                                            actionButton("create_dgelist", "Create DGEList"),
+                                            h3("Check the quality of the experiment"),
+                                            selectInput("quality_check",
+                                                        "",
+                                                        choices = c("",
+                                                                    "View guides distribution",
+                                                                    "View guides cumulative distribution",
+                                                                    "View distribution of genes across samples",
+                                                                    "View heatmap of guide counts"),
+                                                        selected = NULL)
+                                          ),
                                         ),
                                         mainPanel(
                                           textOutput("dgelist_status"),  # Display status for DGEList creation
-                                          verbatimTextOutput("dge_list_output")  # Output for DGEList
+                                          conditionalPanel(
+                                            condition = "input.quality_check == 'View guides distribution'", # Display guide distribution
+                                            h3("The distribution of SgRNA numbers per gene"),
+                                            plotOutput("guide_distribution"),
+                                            uiOutput("download_guide_pdf_button")
+                                          ),
                                         )
                                       )
                              ),
@@ -254,6 +240,9 @@ server <- function(input, output, session) {
   )
 
   # DGEList creation
+  # Declare reactive value for DGEList
+  edgeR_object <- reactiveVal(NULL)
+
   observeEvent(input$create_dgelist, {
     req(input$uploadcounts, input$uploadsamples)  # Ensure necessary files are uploaded
 
@@ -264,13 +253,47 @@ server <- function(input, output, session) {
     dge$samples$group <- dge$samples$Groups
     dge$samples$Groups <- NULL
     rownames(dge) <- read_file_and_render(input$uploadcounts)[,1]
+    # Update the reactive value
+    edgeR_object(dge)  # Set the edgeR DGEList object
+    output$dgelist_status <- renderText("DGEList created successfully!")
     # Print the DGEList output in the Preprocessing tab
     output$dge_list_output <- renderPrint({
-      dge  # Display the DGEList object
+      req(edgeR_object())
+      edgeR_object()  # Display the DGEList object
     })
 
-    output$dgelist_status <- renderText("DGEList created successfully!")
   })
+
+  # Display quality check outputs
+  guide_pdf <- function(){
+    req(edgeR_object())
+    barplot(table(table(edgeR_object()$genes$Gene_ID)), xlab = "Number of sgRNA per gene", main = "The distribution of sgRNA per gene",
+            col = "#CD534CFF", xlim = c(0, 6.4), ylab = "frequency",
+            border = NA)
+  }
+
+  output$guide_distribution <- renderPlot({
+    if(!is.null(guide_pdf())) guide_pdf()
+  })
+
+    output$download_guide_pdf <- downloadHandler(
+    filename = function() {
+      paste('guide-distribution', Sys.Date(), '.pdf', sep='')
+    },
+    content = function(file) {
+      pdf(file)
+      (guide_pdf())
+      dev.off()
+    }
+  )
+
+    output$download_guide_pdf_button <- renderUI({
+      req(guide_pdf())
+      downloadButton("download_guide_pdf")
+    })
+
+
+
 }
 
 # Run the app
