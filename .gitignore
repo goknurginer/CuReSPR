@@ -5,6 +5,7 @@
 .DS_Store
 .quarto
 # folders
+exampledata/
 fastqs/
 bams/
 fastq_files/
@@ -17,12 +18,4 @@ countmatrices/
 datasets/T8/
 datasets/Tox/
 # R files
-R/steps_2_create_pkg.R
-R/apptest.R
-R/appglue.R
-R/countingT8.R
-R/counting.R
-R/countingbase.R
-R/countingall.R
-R/shinyselect_michael.R
-R/app_v1.R
+R/2023-11-07-Analysis-UWB-zeros-removed-GGiner copy.Rmd
