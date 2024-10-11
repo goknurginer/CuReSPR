@@ -1,10 +1,10 @@
 Package: CuReSPR
-Title: What the Package Does (One Line, Title Case)
+Title: CuReSPR Software Platform With R: Enabling Breakthroughs in Cancer Cures Through a Seamless Genome Editing Analysis of CRISPR Screens. 
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+    person("Goknur", "Giner", , email = "goknurginer@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: CuReSPR is a software platform integrating two robust genomics data analysis libraries: edgeR (Empirical Analysis of Digital Gene Expression in R) and MAGeCK (Model-based Analysis of Genome-wide CRISPR Knockout) to analyse genome editing data. Genome editing allows researchers to selectively modify genes in an organism. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -14,3 +14,12 @@ Suggests:
 Config/testthat/edition: 3
 URL: https://github.com/goknurginer/CuReSPR
 BugReports: https://github.com/goknurginer/CuReSPR/issues
+Imports:
+    shiny,
+    shinyWidgets,
+    shinythemes,
+    DT,
+    refund.shiny,
+    tidyverse,
+    readr,
+    edgeR
