@@ -7,6 +7,10 @@ library(refund.shiny)
 library(tidyverse)
 library(readr)
 library(edgeR)
+utils::globalVariables(c("reactiveVal",
+                         "renderPlot",
+                         "renderDataTable",
+                         "dataTableOutput"))
 
 # Set maximum upload size to 1 GB ####
 options(shiny.maxRequestSize = 1000 * 1024^2)

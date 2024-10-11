@@ -1,11 +1,14 @@
-# Import the entire shiny and DT packages
+# Import entire packages
 import(shiny)
+import(shinyWidgets)
+import(shinythemes)
 import(DT)
+import(refund.shiny)
+import(tidyverse)
+import(readr)
+import(edgeR)
 
 # Import specific functions from other packages
-importFrom(stats, rnorm, runif)    # Example functions from stats (if used)
-importFrom(utils, read.csv, globalVariables)   # For file reading or declaring global variables
+importFrom(tools, file_ext)
 
-# Declare global variables to avoid warnings during R CMD check
-globalVariables(c("reactiveVal", "renderPlot", "renderDataTable", 
-                  "dataTableOutput", "textInput", "datatable"))
+# End of NAMESPACE
