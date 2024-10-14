@@ -1,10 +1,11 @@
 Package: CuReSPR
-Title: CuReSPR Software Platform With R: Enabling Breakthroughs in Cancer Cures Through a Seamless Genome Editing Analysis of CRISPR Screens. 
+Title: CuReSPR Software Platform With R: Genome Editing Analysis of CRISPR Screens
 Version: 0.0.0.9000
+Author: Goknur Giner
+Maintainer: Goknur Giner <goknurginer@gmail.com>
 Authors@R: 
-    person("Goknur", "Giner", , email = "goknurginer@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: CuReSPR is a software platform integrating two robust genomics data analysis libraries: edgeR (Empirical Analysis of Digital Gene Expression in R) and MAGeCK (Model-based Analysis of Genome-wide CRISPR Knockout) to analyse genome editing data. Genome editing allows researchers to selectively modify genes in an organism. 
+    person(given = "Goknur", family = "Giner", email = "goknurginer@gmail.com", role = c("aut", "cre"))
+Description: CuReSPR is a software platform integrating two robust genomics data analysis libraries: edgeR and MAGeCK to analyze genome editing data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

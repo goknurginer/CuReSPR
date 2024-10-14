@@ -10,5 +10,8 @@ import(edgeR)
 
 # Import specific functions from other packages
 importFrom(tools, file_ext)
+importFrom("grDevices", "dev.off", "pdf")
+importFrom("graphics", "barplot")
+importFrom("utils", "read.table", "write.csv")
 
 # End of NAMESPACE
