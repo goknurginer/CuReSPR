@@ -42,7 +42,7 @@ ui <- navbarPage(
           actionButton("viewsamples", "View sample information"),
           hr(),
           radioButtons(
-            "count_matrix_yes_no", 
+            "count_matrix_yes_no",
             label = "Do you have a count matrix?",
             choices = list("Yes" = "yes", "No" = "no"), selected = ""
           ),
@@ -182,8 +182,8 @@ ui <- navbarPage(
           conditionalPanel(
             condition = "input.quality_check == 'View guide distribution per gene'", # nolint
             h3("The distribution of guides per gene"),
-            # plotOutput("guide_distribution_per_gene"),
-            # uiOutput("download_guide_per_gene_button")
+            plotOutput("guide_distribution_per_gene"),
+            # uiOutput("download_guide_per_gene_button"),
             textOutput("gene_selected")
           )
         )
@@ -388,7 +388,56 @@ server <- function(input, output, session) {
     req(guide_pdf())
     downloadButton("download_guide_pdf")
   })
+## Display view guide distribution per gene line plots
+gene.linePlot <- function(gene = NULL) {
+  req(edgeR_object())
+  req(input$selected_gene)
+  gene <- input$selected_gene
+  # If no gene is provided, use the first gene in the dataset
+  if (is.null(gene)) {
+    gene <- edgeR_object()$genes$Gene_ID[1]  # Select the first gene by default
+  }
+
+  # Filter the genes to find the selected gene
+  gene_rows <- edgeR_object()$genes$Gene_ID == gene
+  if (any(gene_rows)) {
+    # Subset the counts for the specified gene
+    pg <- edgeR_object()$counts[gene_rows, ]
+
+    # Reshape the data for plotting
+    df <- reshape2::melt(pg)
+    
+    # Rename columns for clarity
+    colnames(df) <- c("SgRNA_Sequence", "Condition", "Abundance")
+
+    # Create line plot using ggplot
+    p <- ggplot(data = df, aes(x = Condition, y = Abundance, group = SgRNA_Sequence)) +
+      geom_line(aes(color = SgRNA_Sequence)) +
+      theme_classic() +
+      ggtitle(paste0("Gene ", gene, " SgRNA Distribution"))
+
+    # Return the plot object
+    return(p)
+  } else {
+    return(NULL)
+  }
 }
+
+
+output$guide_distribution_per_gene <- renderPlot({
+  # No need to require input$selected_gene
+  p <- gene.linePlot()  # Default behavior if no gene is provided
+  if (!is.null(p)) {
+    print(p)
+  } else {
+    plot.new()
+    text(0.5, 0.5, "No data available for the selected gene.", cex = 1.5)
+  }
+})
+}
+
+
+
 
 
 # Run the app
