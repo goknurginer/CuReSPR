@@ -149,13 +149,12 @@ ui <- navbarPage(
               "quality_check", "",
               choices = c(
                 "", "View guides distribution",
-                "View guide distribution per gene",
-                "View heatmap of guide counts"
+                "View guide distribution per gene"
               ),
               selected = NULL
             ),
             conditionalPanel(
-              condition = "input.quality_check == 'View guide distribution per gene'",
+              condition = "input.quality_check == 'View guide distribution per gene'", # nolint
               selectizeInput(
                 "selected_gene",
                 "Select or Enter Gene Symbol:",
@@ -177,14 +176,13 @@ ui <- navbarPage(
             condition = "input.quality_check == 'View guides distribution'",
             h3("The distribution of SgRNA numbers"),
             plotOutput("guide_distribution"),
-            uiOutput("download_guide_pdf_button")
+            uiOutput("download_guide_distribution_button")
           ),
           conditionalPanel(
             condition = "input.quality_check == 'View guide distribution per gene'", # nolint
             h3("The distribution of guides per gene"),
             plotOutput("guide_distribution_per_gene"),
-            # uiOutput("download_guide_per_gene_button"),
-            textOutput("gene_selected")
+            uiOutput("download_guide_distribution_per_gene_button")
           )
         )
       )
@@ -351,11 +349,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # Output the selected gene
-  output$gene_selected <- renderText({
-    paste("You selected:", input$selected_gene)
-  })
-
   # Display quality check outputs
   ## Display 'View guide distribution'
   guide_pdf <- function() {
@@ -373,7 +366,7 @@ server <- function(input, output, session) {
     if (!is.null(guide_pdf())) guide_pdf()
   })
 
-  output$download_guide_pdf <- downloadHandler(
+  output$download_guide_distribution <- downloadHandler(
     filename = function() {
       paste("guide-distribution", Sys.Date(), ".pdf", sep = "")
     },
@@ -384,10 +377,11 @@ server <- function(input, output, session) {
     }
   )
 
-  output$download_guide_pdf_button <- renderUI({
+  output$download_guide_distribution_button <- renderUI({
     req(guide_pdf())
-    downloadButton("download_guide_pdf")
+    downloadButton("download_guide_distribution")
   })
+
 ## Display view guide distribution per gene line plots
 gene.linePlot <- function(gene = NULL) {
   req(edgeR_object())
@@ -423,7 +417,6 @@ gene.linePlot <- function(gene = NULL) {
   }
 }
 
-
 output$guide_distribution_per_gene <- renderPlot({
   # No need to require input$selected_gene
   p <- gene.linePlot()  # Default behavior if no gene is provided
@@ -434,11 +427,23 @@ output$guide_distribution_per_gene <- renderPlot({
     text(0.5, 0.5, "No data available for the selected gene.", cex = 1.5)
   }
 })
+
+output$download_guide_distribution_per_gene <- downloadHandler(
+  filename = function() {
+    paste("guide-distribution-", input$selected_gene, "-", Sys.Date(), ".pdf", sep = "")
+  },
+  content = function(file) {
+    pdf(file)
+    gene.linePlot(input$selected_gene)
+    dev.off()
+  }
+)
+
+output$download_guide_distribution_per_gene_button <- renderUI({
+  req(gene.linePlot())
+  downloadButton("download_guide_distribution_per_gene")
+})
 }
-
-
-
-
 
 # Run the app
 shinyApp(ui = ui, server = server)
