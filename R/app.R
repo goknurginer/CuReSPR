@@ -1,3 +1,5 @@
+# app.R
+
 setwd("/Users/giner.g/Documents/Github/CuReSPR/R")
 source("global.R")
 global_dge <- NULL
@@ -80,7 +82,7 @@ ui <- navbarPage(
             p(textOutput("groups", inline = TRUE)),
             uiOutput("after_upload_button"),
             hr()
-          ),
+          )
         ),
         mainPanel(
           conditionalPanel(
@@ -102,8 +104,7 @@ ui <- navbarPage(
             verbatimTextOutput("fastqFilesOutput")
           ),
           conditionalPanel(
-            condition = "input.count_matrix_yes_no == 'yes' 
-            && input.viewcounts > 0",
+            condition = "input.count_matrix_yes_no == 'yes' && input.viewcounts > 0",
             hr(),
             h4("Count matrix"),
             DT::dataTableOutput("dataTableCounts")
@@ -149,22 +150,36 @@ ui <- navbarPage(
               "quality_check", "",
               choices = c(
                 "", "View guides distribution",
-                "View guide distribution per gene"
+                "View guide distribution per gene",
+                "View gene abundances across samples"
               ),
               selected = NULL
             ),
             conditionalPanel(
-              condition = "input.quality_check == 'View guide distribution per gene'", # nolint
+              condition = "input.quality_check == 'View guide distribution per gene'",
               selectizeInput(
                 "selected_gene",
                 "Select or Enter Gene Symbol:",
                 choices = NULL,  # Choices will be updated dynamically
                 multiple = FALSE,
-                # Single selection (or set to TRUE for multiple selections)
                 options = list(
                   placeholder = 'Type to search for a gene...',
-                  maxOptions = 1000,  # Number of options to display at once in the dropdown
-                  allowEmptyOption = TRUE  # Allow an empty input field before typing
+                  maxOptions = 1000,
+                  allowEmptyOption = TRUE
+                )
+              )
+            ),
+            conditionalPanel(
+              condition = "input.quality_check == 'View gene abundances across samples'",
+              selectizeInput(
+                "selected_gene1",
+                "Select or Enter Gene Symbol:",
+                choices = NULL,  # Choices will be updated dynamically
+                multiple = FALSE,
+                options = list(
+                  placeholder = 'Type to search for a gene...',
+                  maxOptions = 1000,
+                  allowEmptyOption = TRUE
                 )
               )
             )
@@ -179,10 +194,16 @@ ui <- navbarPage(
             uiOutput("download_guide_distribution_button")
           ),
           conditionalPanel(
-            condition = "input.quality_check == 'View guide distribution per gene'", # nolint
+            condition = "input.quality_check == 'View guide distribution per gene'",
             h3("The distribution of guides per gene"),
             plotOutput("guide_distribution_per_gene"),
             uiOutput("download_guide_distribution_per_gene_button")
+          ),
+          conditionalPanel(
+            condition = "input.quality_check == 'View gene abundances across samples'",
+            h4("The distribution of gene abundances"),
+            plotOutput("gene_abundance_distribution"),
+            uiOutput("download_gene_abundance_distribution_button")
           )
         )
       )
@@ -200,7 +221,7 @@ ui <- navbarPage(
 server <- function(input, output, session) {
 
   output$after_upload_button <- renderUI({
-    req(input$nextnum > 0)  # Ensure input.nextnum is greater than 0
+    req(input$nextnum > 0)
     if (input$count_matrix_yes_no == "no") {
       actionButton("gotocountingfastq", "Go to Counting")
     } else if (input$count_matrix_yes_no == "yes") {
@@ -215,7 +236,7 @@ server <- function(input, output, session) {
   output$fastqFilesOutput <- renderPrint({
     req(input$upload)
     fastq_file_names <- input$upload$name
-    fastq_uploaded(TRUE)  # Mark Fastq files as uploaded
+    fastq_uploaded(TRUE)
     paste("Uploaded Fastq files:", 
           paste(fastq_file_names, collapse = ", "))
   })
@@ -224,21 +245,21 @@ server <- function(input, output, session) {
 
   observeEvent(input$viewcounts, {
     output$dataTableCounts <- DT::renderDataTable({
-      req(input$uploadcounts)  # Ensure a file is uploaded
+      req(input$uploadcounts)
       datatable(read_file_and_render(input$uploadcounts))
     })
   })
 
   observeEvent(input$viewsamples, {
     output$dataTableSamples <- DT::renderDataTable({
-      req(input$uploadsamples)  # Ensure a file is uploaded
+      req(input$uploadsamples)
       datatable(read_file_and_render(input$uploadsamples))
     })
   })
 
   observeEvent(input$viewguides, {
     output$dataTableGuides <- DT::renderDataTable({
-      req(input$uploadguides)  # Ensure a file is uploaded
+      req(input$uploadguides)
       datatable(read_file_and_render(input$uploadguides))
     })
   })
@@ -276,7 +297,7 @@ server <- function(input, output, session) {
     # Placeholder for actual logic; add counting logic later
     count_data <- data.frame(
       sgRNA_ID = c("sgRNA1", "sgRNA2"),
-      Count = c(100, 200)  # Sample count data
+      Count = c(100, 200)
     )
 
     output$count_table <- renderDT({
@@ -304,7 +325,7 @@ server <- function(input, output, session) {
       req(input$guidecounts)
       count_data <- data.frame(
         sgRNA_ID = c("sgRNA1", "sgRNA2"),
-        Count = c(100, 200)  # Sample count data
+        Count = c(100, 200)
       )
       write.csv(count_data, file, row.names = FALSE)
     }
@@ -325,7 +346,7 @@ server <- function(input, output, session) {
     dge$samples$group <- dge$samples$Groups
     dge$samples$Groups <- NULL
     rownames(dge) <- read_file_and_render(input$uploadcounts)[, 1]
-    edgeR_object(dge)  # Set the edgeR DGEList object
+    edgeR_object(dge)
     output$dgelist_status <- renderText("DGEList created successfully!")
 
     output$dge_list_output <- renderPrint({
@@ -336,21 +357,29 @@ server <- function(input, output, session) {
 
   # Dynamically update gene_ids based on the reactive edgeR_object
   observe({
-    req(edgeR_object())  # Ensure edgeR_object exists
+    req(edgeR_object())
 
     # Extract gene IDs from the DGEList object
-    gene_ids <- unique(edgeR_object()$genes$Gene_ID)  # Assuming Gene_IDs are in rownames
+    gene_ids <- unique(edgeR_object()$genes$Gene_ID)
 
-    # Dynamically update the selectInput with gene IDs
+    # Update selectizeInput for 'selected_gene' (View guide distribution per gene)
     updateSelectizeInput(session,
       "selected_gene",
+      choices = gene_ids,
+      server = TRUE
+    )
+
+    # Update selectizeInput for 'selected_gene1' (View gene abundances across samples)
+    updateSelectizeInput(session,
+      "selected_gene1",
       choices = gene_ids,
       server = TRUE
     )
   })
 
   # Display quality check outputs
-  ## Display 'View guide distribution'
+
+  ## Display 'View guides distribution'
   guide_pdf <- function() {
     req(edgeR_object())
     barplot(
@@ -382,67 +411,110 @@ server <- function(input, output, session) {
     downloadButton("download_guide_distribution")
   })
 
-## Display view guide distribution per gene line plots
-gene.linePlot <- function(gene = NULL) {
-  req(edgeR_object())
-  req(input$selected_gene)
-  gene <- input$selected_gene
-  # If no gene is provided, use the first gene in the dataset
-  if (is.null(gene)) {
-    gene <- edgeR_object()$genes$Gene_ID[1]  # Select the first gene by default
+  ## Display 'View guide distribution per gene' line plots
+  gene.linePlot <- function() {
+    req(edgeR_object())
+    req(input$selected_gene)
+    gene <- input$selected_gene
+
+    # Filter the genes to find the selected gene
+    gene_rows <- edgeR_object()$genes$Gene_ID == gene
+    if (any(gene_rows)) {
+      # Subset the counts for the specified gene
+      pg <- edgeR_object()$counts[gene_rows, ]
+
+      # Reshape the data for plotting
+      df <- reshape2::melt(pg)
+
+      # Rename columns for clarity
+      colnames(df) <- c("SgRNA_Sequence", "Sample", "Abundance")
+
+      # Create line plot using ggplot
+      p <- ggplot(data = df, aes(x = Sample, y = Abundance, group = SgRNA_Sequence)) +
+        geom_line(aes(color = SgRNA_Sequence)) +
+        theme_classic() +
+        ggtitle(paste0("Gene ", gene, " SgRNA Distribution"))
+
+      return(p)
+    } else {
+      return(NULL)
+    }
   }
 
-  # Filter the genes to find the selected gene
-  gene_rows <- edgeR_object()$genes$Gene_ID == gene
-  if (any(gene_rows)) {
-    # Subset the counts for the specified gene
-    pg <- edgeR_object()$counts[gene_rows, ]
+  output$guide_distribution_per_gene <- renderPlot({
+    p <- gene.linePlot()
+    if (!is.null(p)) {
+      print(p)
+    } else {
+      plot.new()
+      text(0.5, 0.5, "No data available for the selected gene.", cex = 1.5)
+    }
+  })
 
-    # Reshape the data for plotting
-    df <- reshape2::melt(pg)
-    
-    # Rename columns for clarity
-    colnames(df) <- c("SgRNA_Sequence", "Condition", "Abundance")
+  output$download_guide_distribution_per_gene <- downloadHandler(
+    filename = function() {
+      paste("guide-distribution-", input$selected_gene, "-", Sys.Date(), ".pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file)
+      p <- gene.linePlot()
+      if (!is.null(p)) print(p)
+      dev.off()
+    }
+  )
 
-    # Create line plot using ggplot
-    p <- ggplot(data = df, aes(x = Condition, y = Abundance, group = SgRNA_Sequence)) +
-      geom_line(aes(color = SgRNA_Sequence)) +
-      theme_classic() +
-      ggtitle(paste0("Gene ", gene, " SgRNA Distribution"))
+  output$download_guide_distribution_per_gene_button <- renderUI({
+    req(gene.linePlot())
+    downloadButton("download_guide_distribution_per_gene")
+  })
 
-    # Return the plot object
-    return(p)
-  } else {
-    return(NULL)
+  ## Display 'View gene abundances across samples'
+  gene_dist_plot <- function() {
+    req(edgeR_object())
+    req(input$selected_gene1)
+
+    gene <- input$selected_gene1
+    gene_rows <- edgeR_object()$genes$Gene_ID == gene
+
+    if (any(gene_rows)) {
+      # Subset the counts for the specified gene
+      pg <- edgeR_object()$counts[gene_rows, ]
+
+      # Sum counts across guides for the gene in each sample
+      gene_counts <- colSums(pg)
+
+      # Generate bar plot
+      barplot(gene_counts,
+              xlab = "Samples",
+              main = paste("Guide abundance of gene ", gene, " across samples", sep = ""),
+              col = "#CD534CFF",
+              ylab = "Abundance",
+              names.arg = names(gene_counts),
+              las = 2,  # Rotate sample labels if necessary
+              border = NA)
+    }
   }
-}
 
-output$guide_distribution_per_gene <- renderPlot({
-  # No need to require input$selected_gene
-  p <- gene.linePlot()  # Default behavior if no gene is provided
-  if (!is.null(p)) {
-    print(p)
-  } else {
-    plot.new()
-    text(0.5, 0.5, "No data available for the selected gene.", cex = 1.5)
-  }
-})
+  output$gene_abundance_distribution <- renderPlot({
+    gene_dist_plot()
+  })
 
-output$download_guide_distribution_per_gene <- downloadHandler(
-  filename = function() {
-    paste("guide-distribution-", input$selected_gene, "-", Sys.Date(), ".pdf", sep = "")
-  },
-  content = function(file) {
-    pdf(file)
-    gene.linePlot(input$selected_gene)
-    dev.off()
-  }
-)
+  output$download_gene_abundance_distribution <- downloadHandler(
+    filename = function() {
+      paste('distribution-of-', input$selected_gene1 ,'-', Sys.Date(), '.pdf', sep='')
+    },
+    content = function(file) {
+      pdf(file)
+      gene_dist_plot()
+      dev.off()
+    }
+  )
 
-output$download_guide_distribution_per_gene_button <- renderUI({
-  req(gene.linePlot())
-  downloadButton("download_guide_distribution_per_gene")
-})
+  output$download_gene_abundance_distribution_button <- renderUI({
+    req(gene_dist_plot())
+    downloadButton("download_gene_abundance_distribution")
+  })
+
 }
 
 # Run the app
