@@ -12,6 +12,10 @@ library(RColorBrewer)
 library(varhandle)
 library(gplots)
 library(here)
+library(MAGeCKFlute)
+library(clusterProfiler)
+library(ggplot2)
+
 utils::globalVariables(c("reactiveVal",
                          "renderPlot",
                          "renderDataTable",
@@ -28,34 +32,32 @@ options(shiny.maxRequestSize = 1000 * 1024^2)
 # Functions ####
 # read_file_and_render function ####
 # Define a function to read files and render DataTable
-read_file_and_render <- function(file_input) {
-  # Ensure the file is uploaded
-  req(file_input)
-  # Extract file extension
-  file_ext <- tools::file_ext(file_input$name)
+read_file_and_render <- function(file_input = NULL, example_file_path = NULL) {
+    # Check which file path to use
+    if (!is.null(example_file_path)) {
+        file_path <- example_file_path
+        file_ext <- tools::file_ext(file_path)
+    } else if (!is.null(file_input)) {
+        req(file_input)
+        file_path <- file_input$datapath
+        file_ext <- tools::file_ext(file_input$name)
+    } else {
+        stop("No file provided. Please upload a file or select an example.")
+    }
 
-  # Read file based on extension and detect separator if necessary
-  df <- switch(file_ext,
-               "csv" = read.table(file_input$datapath,
-                                  check.names = FALSE,
-                                  sep = ",",
-                                  header = TRUE),
-               "tsv" = read.table(file_input$datapath,
-                                  check.names = FALSE,
-                                  sep = "\t",
-                                  header = TRUE),
-               "txt" = {
-                 # Detect separator for .txt files
-                 first_line <- readLines(file_input$datapath, n = 1)
-                 sep_char <- if (grepl("\t", first_line)) "\t" else " "
-                 read.table(file_input$datapath,
-                            check.names = FALSE,
-                            sep = sep_char,
-                            header = TRUE)
-               },
-               stop("Unsupported file type"))
-  return(df)
+    # Read file based on extension and detect separator if necessary
+    df <- switch(file_ext,
+                 "csv" = read.table(file_path, check.names = FALSE, sep = ",", header = TRUE),
+                 "tsv" = read.table(file_path, check.names = FALSE, sep = "\t", header = TRUE),
+                 "txt" = {
+                     first_line <- readLines(file_path, n = 1)
+                     sep_char <- if (grepl("\t", first_line)) "\t" else " "
+                     read.table(file_path, check.names = FALSE, sep = sep_char, header = TRUE)
+                 },
+                 stop("Unsupported file type"))
+    return(df)
 }
+
 
 sample_data <- function(){
   e <- new.env()
@@ -70,23 +72,6 @@ genes_data <- function(){
   x <- e[[name]]
   return(x)
 }
-
-# -------------------- Read Data ----------------------------------------
-
-# x labels: group names + biorep + techrep
-get_x_lab <- function(dge){
-  x_lab <- dge$samples$group
-  # check if there are biological replicates
-  if ("biorep"  %in% names(dge$samples) & length(unique(dge$samples$biorep)) >1){
-    x_lab <- paste(x_lab, dge$samples$biorep, sep = ".")
-  }
-  
-  if ("techrep"  %in% names(dge$samples) & length(unique(dge$samples$techrep)) >1){
-    x_lab <- paste(x_lab, dge$samples$techrep, sep = ".")
-  }
-  return(x_lab)
-}
-
 
 read_file <- function(x){
   name <- toString(x$name)

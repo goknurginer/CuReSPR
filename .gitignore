@@ -22,3 +22,10 @@ R/2023-11-07-Analysis-UWB-zeros-removed-GGiner copy.Rmd
 CuReSPR_0.0.0.9000.tar.gz
 CuReSPR.Rcheck/
 datasets/gecko/
+datasets/base/magecktest/
+datasets/base/samples.csv
+produce_mageck_counts.R
+R/MAGeCKFlute_Pmel1-gene-guide/
+R/MAGeCKFlute_Pmel1-mle-gene/
+R/MAGeCKFlute_Pmel1/
+R/app_classified.R

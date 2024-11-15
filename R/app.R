@@ -13,31 +13,32 @@ ui <- navbarPage("CuReSPR",
         h3("Enter the details of the experimental design"),
         helpText(
           "First upload ",
-          "your fastq files and assign each fastq file to its group. ",
-          "Specify any biological or technical replicates, if they exist, ",
-          "and indicate whether the files are paired-end or single-end. ",
+          "your guide library, than information about your samples. ",
+          "Specify any biological or technical replicates, if they exist.",
           "Review and submit them for the counting step."
         ),
         hr(),
         h4("Upload guide RNA library"),
-        helpText("Please upload the guide library."),
+        helpText("Please upload the guide library like in the example. Make sure the column names are 'SgRNA_ID', 'SgRNA_Sequence', 'Gene_ID' in this order."),
         hr(),
         fileInput(
           "uploadguides", label = "",
           accept = c(".tsv", ".csv", ".txt"), multiple = TRUE
         ),
+        checkboxInput("example_guide_library", "Use example guide library", FALSE),
         actionButton("viewguides", "View guide library"),
         hr(),
         hr(),
         h4("Upload sample information"),
         helpText(
-          "Please upload the file containing sample information."
+          "Please upload sample information like in the example. Make sure the column names are 'Fastqnames', 'Groups', 'Biorep', 'Techrep' in this order."
         ),
         hr(),
         fileInput(
           "uploadsamples", label = "",
           accept = c(".tsv", ".csv", ".txt"), multiple = TRUE
         ),
+        checkboxInput("example_sample_info", "Use example sample information", FALSE),
         actionButton("viewsamples", "View sample information"),
         hr(),
         radioButtons("count_matrix_yes_no",
@@ -47,12 +48,13 @@ ui <- navbarPage("CuReSPR",
         conditionalPanel(
           condition = "input.count_matrix_yes_no == 'yes'",
           h4("Upload count matrix"),
-          helpText("Please upload the count matrix."),
+          helpText("Please upload the count matrix like in the example. Make sure the column names are 'SgRNA_Sequence', 'Gene_ID'	and sample names in this order."),
           hr(),
           fileInput(
             "uploadcounts", label = "",
             accept = c(".tsv", ".csv", ".txt"), multiple = TRUE
           ),
+          checkboxInput("example_count_matrix", "Use example count matrix", FALSE),
           actionButton("viewcounts", "View count matrix")
         ),
         conditionalPanel(
@@ -61,50 +63,37 @@ ui <- navbarPage("CuReSPR",
           fileInput(
             "upload", label = "",
             accept = c(".fastq", "fastq.gz"), multiple = TRUE
-          )
+          ),
+          checkboxInput("example_fastq_files", "Use example fastq files", FALSE),
         ),
-        hr(),
-        h4("Set group numbers"),
-        helpText("Enter number of groups in your experiment."),
-        numericInput("num", label = "", value = 0, min = 0),
-        actionButton("nextnum", "Next"),
-        conditionalPanel(
-          condition = "input.nextnum > 0",
-          hr(),
-          h4("Assign group names"),
-          helpText("Enter names for each group."),
-          hr(),
-          uiOutput("groupnames"),
-          p(textOutput("groups", inline = TRUE)),
-          uiOutput("datauploadnext"),
-          hr()
-        )
       ),
       mainPanel(
-          conditionalPanel(
+        conditionalPanel(
             condition = "input.viewguides > 0",
             hr(),
             h4("Guide library"),
             DT::dataTableOutput("dataTableGuides")
-          ),
-          conditionalPanel(
+        ),
+        conditionalPanel(
             condition = "input.viewsamples > 0",
             hr(),
             h4("Sample information"),
             DT::dataTableOutput("dataTableSamples")
-          ),
-          conditionalPanel(
-            condition = "input.count_matrix_yes_no == 'no'",
-            hr(),
-            h4("Here are the uploaded Fastq files"),
-            verbatimTextOutput("fastqFilesOutput")
-          ),
-          conditionalPanel(
+        ),
+        conditionalPanel(
+          condition = "input.count_matrix_yes_no == 'no' && !is.null(input$upload)",
+          hr(),
+          h4("Here are the uploaded Fastq files"),
+          verbatimTextOutput("fastqFilesOutput"),
+          uiOutput("datauploadnext")
+        ),
+        conditionalPanel(
             condition = "input.count_matrix_yes_no == 'yes' && input.viewcounts > 0",
             hr(),
             h4("Count matrix"),
-            DT::dataTableOutput("dataTableCounts")
-          )
+            DT::dataTableOutput("dataTableCounts"),
+            uiOutput("datauploadnext")
+        )
       )
     )
   ),
@@ -139,6 +128,48 @@ ui <- navbarPage("CuReSPR",
           conditionalPanel(
             condition = "input.software == 'edgeR'",
             h3("Create edgeR data object"),
+            actionButton("create_dgelist", "Create DGEList"),
+            h3("Check the quality of the experiment"),
+            selectInput(
+              "quality_check", "",
+              choices = c(
+                "", "View guides distribution",
+                "View guide distribution per gene",
+                "View gene abundances across samples"
+              ),
+              selected = NULL
+            ),
+            conditionalPanel(
+              condition = "input.quality_check == 'View guide distribution per gene'",
+              selectizeInput(
+                "selected_gene",
+                "Select or Enter Gene Symbol:",
+                choices = NULL,  # Choices will be updated dynamically
+                multiple = FALSE,
+                options = list(
+                  placeholder = 'Type to search for a gene...',
+                  maxOptions = 1000,
+                  allowEmptyOption = TRUE
+                )
+              )
+            ),
+            conditionalPanel(
+              condition = "input.quality_check == 'View gene abundances across samples'",
+              selectizeInput(
+                "selected_gene1",
+                "Select or Enter Gene Symbol:",
+                choices = NULL,  # Choices will be updated dynamically
+                multiple = FALSE,
+                options = list(
+                  placeholder = 'Type to search for a gene...',
+                  maxOptions = 1000,
+                  allowEmptyOption = TRUE
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.software == 'MAGeCK'",
             actionButton("create_dgelist", "Create DGEList"),
             h3("Check the quality of the experiment"),
             selectInput(
@@ -432,14 +463,6 @@ ui <- navbarPage("CuReSPR",
         )
       )
     )
-  ),
-  tabPanel("Differential Analysis",
-    h4("Testing counting"),
-    fluidPage(sidebarPanel())
-  ),
-  tabPanel("Pathway Analysis ",
-    h4("Testing counting"),
-    fluidPage(sidebarPanel())
   )
 )
 
@@ -447,6 +470,19 @@ ui <- navbarPage("CuReSPR",
 server <- function(input, output, session) {
 
 #Functions ####
+# x labels: group names + Biorep + Techrep
+get_x_lab <- function(dge){
+  x_lab <- dge$samples$group
+  # check if there are biological replicates
+  if ("Biorep"  %in% names(dge$samples) & length(unique(dge$samples$Biorep)) >1){
+    x_lab <- paste(x_lab, dge$samples$Biorep, sep = ".")
+  }
+  if ("Techrep"  %in% names(dge$samples) & length(unique(dge$samples$Techrep)) >1){
+    x_lab <- paste(x_lab, dge$samples$Techrep, sep = ".")
+  }
+  return(x_lab)
+}
+
 guide_pdf <- function() {
   req(edgeR_object())
   barplot(
@@ -495,8 +531,8 @@ gene.linePlot <- function() {
             border = NA)
     }
   }
-  #Switching between tabs ####
-  observeEvent(input$gotocountingfastq, {
+#Switching between tabs ####
+  observeEvent(input$gotocounting, {
     updateTabsetPanel(session, "main", "Counting")
   })
   observeEvent(input$gotopreprocessing, {
@@ -517,21 +553,16 @@ gene.linePlot <- function() {
   observeEvent(input$normDone, {
     updateTabsetPanel(session,  "main", "Fitting model")
   })
-  #Dynamically generate UI elements ####
-  output$datauploadnext <- renderUI({ # next button
-    req(input$nextnum > 0)
+#Dynamically generate UI elements ####
+  output$datauploadnext <- renderUI({ 
+    req(input$count_matrix_yes_no)
     if (input$count_matrix_yes_no == "no") {
-      actionButton("gotocountingfastq", "Go to Counting")
+      actionButton("gotocounting", "Go to Counting")
     } else if (input$count_matrix_yes_no == "yes") {
       actionButton("gotopreprocessing", "Go to Preprocessing")
     }
   })
-  output$groupnames <- renderUI({ # group names printed on the screen dynamically
-    groupnames <- lapply(1:input$num, function(i) {
-      textInput(paste0("group", i), label = paste0("Groups are: ", i))
-    })
-    do.call(tagList, groupnames)
-  })
+
   output$download_counts <- renderUI({  # download counting output button
     if (input$guidecounts) {
       tagList(
@@ -564,7 +595,7 @@ gene.linePlot <- function() {
   output$to_dim <- renderUI({
     actionButton(inputId = "normDone", label = paste("Proceed to Analysis with ", input$norm_what, sep = ""))
    })
-  #Dynamically update gene_ids based on the reactive edgeR_object ####
+#Dynamically update gene_ids based on the reactive edgeR_object ####
   observe({
     req(edgeR_object())
     # Extract gene IDs from the DGEList object
@@ -582,30 +613,73 @@ gene.linePlot <- function() {
       server = TRUE
     )
   })
-  #Render DataTables for uploaded files ####
+#Render DataTables for uploaded files ####
+  count_data <- reactive({
+  #Use example file if checkbox is selected
+    if (input$example_count_matrix) {
+        read_file_and_render(example_file_path = "/Users/giner.g/Documents/Github/CuReSPR/exampledata/counts_rsubread.tsv")
+    } else if (!is.null(input$uploadcounts)) {
+      #If user uploads a file, read that
+        read_file_and_render(input$uploadcounts)
+    } else {
+      NULL
+    }
+  })
+
   observeEvent(input$viewcounts, {
     output$dataTableCounts <- DT::renderDataTable({
-      req(input$uploadcounts)
-      datatable(read_file_and_render(input$uploadcounts))
-    })
-  })
-  observeEvent(input$viewsamples, {
-    output$dataTableSamples <- DT::renderDataTable({
-      req(input$uploadsamples)
-      datatable(read_file_and_render(input$uploadsamples))
-    })
-  })
-  observeEvent(input$viewguides, {
-    output$dataTableGuides <- DT::renderDataTable({
-      req(input$uploadguides)
-      datatable(read_file_and_render(input$uploadguides))
+      datatable(count_data())
     })
   })
 
-  #Create reactive values globally ####
+  sample_data <- reactive({
+  #Use example file if checkbox is selected
+    if (input$example_sample_info) {
+        read_file_and_render(example_file_path = "/Users/giner.g/Documents/Github/CuReSPR/exampledata/samples.csv")
+    } else if (!is.null(input$uploadsamples)) {
+      #If user uploads a file, read that
+        read_file_and_render(input$uploadsamples)
+    } else {
+      NULL
+    }
+  })
+
+  observeEvent(input$viewsamples, {
+    output$dataTableSamples <- DT::renderDataTable({
+      datatable(sample_data())
+    })
+  })
+
+  guide_data <- reactive({
+  #Use example file if checkbox is selected
+    if (input$example_guide_library) {
+        read_file_and_render(example_file_path = "/Users/giner.g/Documents/Github/CuReSPR/exampledata/brunello.csv")
+    } else if (!is.null(input$uploadguides)) {
+  #If user uploads a file, read that
+        read_file_and_render(input$uploadguides)
+    } else {
+  #Return NULL if neither option is available
+        NULL
+    }
+  })
+
+  observeEvent(input$viewguides, {
+    output$dataTableGuides <- DT::renderDataTable({
+      datatable(guide_data())
+    })
+  })
+
+#Create reactive values globally ####
   fastq_uploaded <- reactiveVal(FALSE)
+
   edgeR_object <- reactiveVal(NULL)
-  #Downloadhandler functions ####
+
+  x_lab <- reactive({
+    req(edgeR_object())
+     return(get_x_lab(edgeR_object()))
+  })
+
+#Downloadhandler functions ####
   output$download <- downloadHandler(
     filename = function() {
       paste0("guide-counts-", Sys.Date(), ".csv")
@@ -650,13 +724,14 @@ gene.linePlot <- function() {
       dev.off()
     }
   )
-  #RenderPrint, RenderText, RenderDT outputs ####
+#RenderPrint, RenderText, RenderDT outputs ####
   output$fastqFilesOutput <- renderPrint({
     req(input$upload)
-    fastq_file_names <- input$upload$name
-    fastq_uploaded(TRUE)
-    paste("Uploaded Fastq files:", 
-          paste(fastq_file_names, collapse = ", "))
+    if(!is.null(input$upload)){
+      fastq_file_names <- input$upload$name
+      fastq_uploaded(TRUE)
+      paste("Uploaded Fastq files:", paste(fastq_file_names, collapse = ", "))
+    }
   })
   output$groups <- renderText({
     req(input$num)
@@ -692,7 +767,7 @@ gene.linePlot <- function() {
       edgeR_object()
     })
   })
-  #Display quality check outputs ####
+#Display quality check outputs ####
   ## Display 'View guides distribution'
   output$guide_distribution <- renderPlot({
     if (!is.null(guide_pdf())) guide_pdf()
@@ -711,7 +786,7 @@ gene.linePlot <- function() {
   output$gene_abundance_distribution <- renderPlot({
     gene_dist_plot()
   })
-  #Filtering ####
+#Filtering ####
   group_col <- reactive({
     return("group")
   })
@@ -877,7 +952,6 @@ filtered_dge_edgeR <- reactive({
          (input$filter_what == "zero" && !is.null(filtered_dens_zero())) 
         ) downloadButton("download_filtered_dens")
    })
-
    
    output$filtered_density_edgeR <- renderPlot({
      req(filtered_dens_edgeR()) 
@@ -942,8 +1016,7 @@ filtered_dge_edgeR <- reactive({
        }
      }
    }
-     
-     
+
    output$filtered_mds <- renderPlot({
      if(!is.null(filtered_mds())) filtered_mds()
    })
@@ -992,9 +1065,7 @@ filtered_dge_edgeR <- reactive({
      req(edgeR_object())
      downloadButton("download_raw_mds_plot")
    })
-   
-   
-   
+
    output$raw_mds2 <- renderPlot({
      if(!is.null(edgeR_object()) ){
        dim <- dim(edgeR_object())[1]
