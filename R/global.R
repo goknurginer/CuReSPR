@@ -1,5 +1,6 @@
 # Load the necessary packages ####
 library(shiny)
+library(shinyjs)
 library(shinyWidgets)
 library(shinythemes)
 library(DT)
@@ -106,26 +107,26 @@ get_count_matrix <- function(dge){
 }
 
 get_quantile <- function(dge, lib, fastq_set){
-  q <- quantile(dge$counts[, match(lib, fastq_set)], 
+  q <- quantile(dge$counts[, match(lib, fastq_set)],
                 probs = c(0.05, 0.1, 0.9, 0.95))
   return(q)
 }
 
 quantile_table <- function(q){
-  d <- data.frame(Percentile = c("5th", "10th", "90th", "95th", 
-                            paste("90th/10th (80% of sgRNA within ", 
-                                   round(q[3]/q[1], digits = 2), "-fold range)"), 
+  d <- data.frame(Percentile = c("5th", "10th", "90th", "95th",
+                            paste("90th/10th (80% of sgRNA within ",
+                                   round(q[3]/q[1], digits = 2), "-fold range)"),
                             paste("95th/5th (90% of sgRNA within ",
-                                   round(q[4]/q[1], digits = 2), "-fold range)")), 
+                                   round(q[4]/q[1], digits = 2), "-fold range)")),
              Data.treshold = round(c(q, q[3]/q[1], q[4]/q[1]), digits = 2))
   return(d)
 }
 
 
 plot_cdf <- function(dge, q, lib, fastq_set){
-  plot(ecdf(dge$counts[, match(lib, fastq_set)]), col = "lightblue", 
-       xlab = "sgRNA counts", 
-       main = paste("Cumulative Distribution of sgRNA Counts for ",lib, sep = ""), 
+  plot(ecdf(dge$counts[, match(lib, fastq_set)]), col = "lightblue",
+       xlab = "sgRNA counts",
+       main = paste("Cumulative Distribution of sgRNA Counts for ",lib, sep = ""),
        ylab = "Cumulative Frequency")
   for (i in c(0, 100, 200, 300)) {
     for (j in c(0, 0.2, 0.4, 0.6, 0.8, 1)) {
@@ -135,8 +136,8 @@ plot_cdf <- function(dge, q, lib, fastq_set){
   }
   abline(v = q[2], col = "red", lty = "dashed")
   abline(v = q[3], col = "blue", lty = "dashed")
-}  
-  
+}
+
 
 get_gene_dist <- function(dge, gene, xlab){
   index <- match("Symbol", names(dge$genes))
@@ -171,9 +172,9 @@ zero_heatmat <- function(d, group, xlab){
           labCol = xlab,
           cexRow=1,
           main=paste0("Zeros across samples (ordered by aveLogCPM)"),
-          scale="none", 
-          Rowv=NA, 
-          Colv=NA, 
+          scale="none",
+          Rowv=NA,
+          Colv=NA,
           ColSideColors=col1[rep(1:(ncol(dge)/n.replicate),each=n.replicate)],
           col=col2[c(4,5)])
   legend(x="right", legend=c("zero", "none zero"),fill=col2[c(4,5)])
@@ -186,40 +187,40 @@ filter3_update <- function(dge, col, groups){
   #print(dim(dge))
   cpm_dge <- edgeR::cpm(dge, log=FALSE)
   M <- median(dge$samples$lib.size) * 1e-6
-  
+
   if(class(dge) != "DGEList"){
     message("obeject not a DGEList")
   }
-  
-  # Errors, warnings, and messages can be generated within R code using the 
+
+  # Errors, warnings, and messages can be generated within R code using the
   # functions stop, stopifnot, warning, and message
   # stop("Something erroneous has occurred!")
-  
-  
+
+
   # first filter out guides with low counts and variability across all groups
   mean.sd <- apply(cpm(dge$counts, log = TRUE),1,sd)
   lq_sd <- quantile(mean.sd, 0.05)
   mean.count <- rowMeans(cpm(dge$counts, log = TRUE))
   lq_count <- quantile(mean.count, 0.05)
-  
+
   dge <- dge[mean.sd > lq_sd & mean.count > lq_count,]
   cpm_dge <- edgeR::cpm(dge, log=FALSE)
   M <- median(dge$samples$lib.size) * 1e-6
-  
+
   # if groups argument not supplied, take all the groups into consideration
   if(is.na(groups[1]) | is.null(groups[1])){
     groups <- unique(dge$samples[,col])
   }
-  
+
   ineff_guide_num <- colSums(dge$counts == 0)
   ineff_guide_prop <- ineff_guide_num/dim(dge)[1]
-  
+
   group_col <- vector(mode = "list", length = length(groups)) # column index of the groups
   num_lanes <- vector() # number of lanes each group has
   ineff_guide_mean <- vector() # mean proportion of inefficient guide for each group
-  
+
   j <- 1
-  
+
   for(i in groups){
     col <- as.character(col)
     temp <- which(dge$samples[,col] == i)
@@ -228,9 +229,9 @@ filter3_update <- function(dge, col, groups){
     num_lanes[j] <- length(temp)
     j <- j+1
   }
-  
+
   # vector for controlled group
-  controls <- setdiff(unique(dge$samples[,col]), groups) 
+  controls <- setdiff(unique(dge$samples[,col]), groups)
   ctr_col <- vector(mode = "list", length = length(controls)) # column index of the groups
   num_lanes_ctr <- vector() # number of lanes each group has
   j <- 1
@@ -241,18 +242,18 @@ filter3_update <- function(dge, col, groups){
     num_lanes_ctr[j] <- length(temp)
     j <- j+1
   }
-  
-  
+
+
   if(min(num_lanes) < 2){
     message("At least 2 biological replicates in each group")
   }
-  
+
   # keep out the group that has the highest proportion of inefficient guide
   keep <- which(ineff_guide_mean == max(ineff_guide_mean))
   keep_group <- group_col[keep]
   group_col <- group_col[-keep]
   num_lanes <-  num_lanes[-keep]
-  
+
   # adjusting the 3 parameters
   #C <- median(cpm_dge[,unlist(group_col)]) # threshold for count
   L <- 0.4 # threshold for biological replicates
@@ -261,29 +262,29 @@ filter3_update <- function(dge, col, groups){
   ctr_cpm <- cpm_dge[,unlist(ctr_col)]
   threshold_ctr <- quantile(ctr_cpm[ctr_cpm != 0], probs = 0.25)
   #threshold <- (quantile(dge$counts[,keep_group[[1]]],.99)/M)
-  
+
   good_guides <- vector(mode = "list", length = length(group_col)) # number of lanes that passed the count threshold
-  
-  # keep if had large count in control, low count in treat; 
+
+  # keep if had large count in control, low count in treat;
   # low count in control, high count in treat
   for(i in 1:length(group_col)){
     L_prop <- ceiling(num_lanes[i]*L)
     group_cpm <- cpm_dge[,(group_col[[i]])]
     C <- quantile(group_cpm [group_cpm  != 0],probs = 0.25)
     good_guides[[i]] <- (rowSums(group_cpm > C) >= L_prop) |
-      ((rowSums(keep_cpm > threshold) >= 2)) #| 
+      ((rowSums(keep_cpm > threshold) >= 2)) #|
      # ((rowSums(ctr_cpm < threshold_ctr) >= 2))
   }
-  
+
   bool_index <- good_guides[[1]]
-  
+
   if(length(good_guides) > 1){
     for(i in 2:length(good_guides)){
       bool_index <- bool_index+good_guides[[i]]
     }
     bool_index <- bool_index >= 1
   }
-  
+
   filtered <- dge[bool_index,, keep.lib.sizes=FALSE]
   #print(dim(filtered))
   return(filtered)
@@ -309,9 +310,9 @@ plot_density <- function(dge, title){
   lcpm.cutoff <- log2(10/M + 2/L)
   samplenames <- colnames(dge$counts)
   lcpm <- cpm(dge, log=TRUE)
-  
+
   if(length(lcpm) == 0){
-    plot(1, type="n", xlab="Data is empty after filtering", 
+    plot(1, type="n", xlab="Data is empty after filtering",
          ylab="Data is empty after filtering", xlim=c(0, 10), ylim=c(0, 10))
     title(main=title)
   } else{
@@ -336,7 +337,7 @@ plot_boxplot <- function(dge, title, x_lab){
   boxplot(lcpm, las=2, col=col, main="", names = x_lab)
   title(main=title, ylab="Log-cpm")
 }
-  
+
 
 # function to check whether Treatment or Group column should be use for group name
 get_group_info <- function(dge){
@@ -401,7 +402,7 @@ plot_mds <- function(dge, title){
 
 # -------------------- Analysis -------------------------------------
 get_design<- function(dge){
-  biorep <- make.names(dge$samples$biorep) 
+  biorep <- make.names(dge$samples$biorep)
   group <- make.names(dge$samples$group)
   # include biorep in design if there is biorep
   if(length(unique(biorep)) >1){
@@ -411,7 +412,7 @@ get_design<- function(dge){
     design <- model.matrix(~0+group, data = dge)
     colnames(design) <- gsub("group", "", colnames(design))
   }
-  
+
   return(design)
 }
 
@@ -471,11 +472,11 @@ limma_common <- function(efit, comp1, comp2){
   col2 <- match(comp2,colnames(dt))
   de.common <- which(dt[,col1]!=0 & dt[,col2]!=0)
   if(length(de.common) != 0){
-    
+
     e <- new.env()
     name <- load(here("data","gene_description.RData"), envir = e)
     x <- e[[name]]$genes
-    
+
     get_gene_des <- function(y){
       if(!is.na(y) & y %in% x$Symbol){
         return(x[x$Symbol==y & !is.na(x$Symbol), ][1,4])
@@ -536,11 +537,11 @@ edgeR_pipeline <- function(dge, design, method, contrast){
     fit <- glmQLFit(dge, design)
     qlf <- list()
     for (i in 1:(ncol(contrast))){
-      qlf[[i]] <- glmQLFTest(fit, contrast =contrast[,i]) 
+      qlf[[i]] <- glmQLFTest(fit, contrast =contrast[,i])
     }
     return(qlf)
   }
-  
+
 }
 
 edgeR_table <- function(result){
@@ -552,7 +553,7 @@ edgeR_table <- function(result){
       temp <- cbind(temp,summary(decideTests(result[[i]])))
     }
   }
-  
+
   df <- data.frame(matrix(ncol=dim(temp)[2], nrow=dim(temp)[1]))
   colnames(df) <- colnames(temp)
   rownames(df) <- rownames(temp)
@@ -587,7 +588,7 @@ edgeR_common <- function(result, comp1, comp2, dge, contrast){
     e <- new.env()
     name <- load(here("data","gene_description.RData"), envir = e)
     x <- e[[name]]$genes
-    
+
     get_gene_des <- function(y){
       if(!is.na(y) & y %in% x$Symbol){
         return(x[x$Symbol==y & !is.na(x$Symbol), ][1,4])
@@ -595,7 +596,7 @@ edgeR_common <- function(result, comp1, comp2, dge, contrast){
         return(NA)
       }
     }
-    
+
     temp <- sapply(dge$genes$gene_symbol[de.common], get_gene_des)
     df <- data.frame("DE genes in common" = dge$genes$gene_symbol[de.common],
                      "description" = temp)
@@ -625,7 +626,7 @@ edgeR_heatmap <- function(result, comp, dge, contrast){
   par(mar=rep(0.01,4))
   n.replicate <- ncol(dge)/length(unique(dge$samples$group))
   col <- match(comp,colnames(contrast))
-  col1 <- RColorBrewer::brewer.pal(7, "Purples") 
+  col1 <- RColorBrewer::brewer.pal(7, "Purples")
   tt <- topTags(result[[col]], n=Inf)
   topgenes <- tt$table$gene_symbol[1:100]
   i <- which(dge$genes$gene_symbol %in% topgenes)
