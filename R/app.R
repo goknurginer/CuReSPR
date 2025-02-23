@@ -10,30 +10,35 @@ ui <- navbarPage("CuReSPR",
                  tabPanel("Data Upload",
                           sidebarLayout(
                             sidebarPanel(
-                              h3("Enter the details of the experimental design"),
-                              helpText(
-                                "First upload ",
-                                "your guide library, than information about your samples. ",
-                                "Specify any biological or technical replicates, if they exist.",
-                                "Review and submit them for the counting step."
+                              # Add footer with text and image (positioned at the top of the page)
+                              tags$div(
+                                style = "position: fixed; top: 0; right: 0; width: auto; text-align: center; background-color: #428bca; padding: 10px; z-index: 1000; color: white;",
+                                tags$span("This website is supported by     "),
+                                tags$img(src = "cass.png", height = "30px", width = "auto")
                               ),
-                              hr(),
-                              h4("Upload guide RNA library"),
-                              helpText("Please upload the guide library like in the example. Make sure the column names are 'SgRNA_ID', 'SgRNA_Sequence', 'Gene_ID' in this order."),
-                              hr(),
+                              # Modal 1: Enter Experimental Design
+                              h3(tags$a("Enter the details of the experiment",
+                                        href = "#", onclick = "Shiny.setInputValue('showModal1', true);"
+                                        )),
+                              helpText("Click the title above for detailed instructions."),
+                              # Modal 2: Upload guide RNA library
+                              h3(tags$a(
+                                "1. Upload guide RNA library",
+                                href = "#", onclick = "Shiny.setInputValue('showModal2', true);"
+                              )),
+                              helpText("Click the title above for detailed instructions."),
                               fileInput(
                                 "uploadguides", label = "",
                                 accept = c(".tsv", ".csv", ".txt"), multiple = TRUE
                               ),
                               checkboxInput("example_guide_library", "Use example guide library", FALSE),
                               actionButton("viewguides", "View guide library"),
-                              hr(),
-                              hr(),
-                              h4("Upload sample information"),
-                              helpText(
-                                "Please upload sample information like in the example. Make sure the column names are 'Fastqnames', 'Groups', 'Biorep', 'Techrep' in this order."
-                              ),
-                              hr(),
+                              # Modal 3: Upload guide RNA library
+                              h3(tags$a(
+                                "2. Upload sample information",
+                                href = "#", onclick = "Shiny.setInputValue('showModal3', true);"
+                              )),
+                              helpText("Click the title above for detailed instructions."),
                               fileInput(
                                 "uploadsamples", label = "",
                                 accept = c(".tsv", ".csv", ".txt"), multiple = TRUE
@@ -47,9 +52,12 @@ ui <- navbarPage("CuReSPR",
                               ),
                               conditionalPanel(
                                 condition = "input.count_matrix_yes_no == 'yes'",
-                                h4("Upload count matrix"),
-                                helpText("Please upload the count matrix like in the example. Make sure the column names are 'SgRNA_Sequence', 'Gene_ID'	and sample names in this order."),
-                                hr(),
+                                # Modal 4: Upload count matrix
+                                h3(tags$a(
+                                  "3. Upload count matrix",
+                                  href = "#", onclick = "Shiny.setInputValue('showModal4', true);"
+                                )),
+                                helpText("Click the title above for detailed instructions."),
                                 fileInput(
                                   "uploadcounts", label = "",
                                   accept = c(".tsv", ".csv", ".txt"), multiple = TRUE
@@ -59,7 +67,12 @@ ui <- navbarPage("CuReSPR",
                               ),
                               conditionalPanel(
                                 condition = "input.count_matrix_yes_no == 'no'",
-                                h4("Upload fastq files"),
+                                # Modal 5: Upload fastq files
+                                h3(tags$a(
+                                  "4. Upload fastq files",
+                                  href = "#", onclick = "Shiny.setInputValue('showModal5', true);"
+                                )),
+                                helpText("Click the title above for detailed instructions."),
                                 fileInput(
                                   "upload", label = "",
                                   accept = c(".fastq", "fastq.gz"), multiple = TRUE
@@ -115,360 +128,415 @@ ui <- navbarPage("CuReSPR",
                             )
                           )
                  ),
-                 navbarMenu("Preprocessing",
-                            tabPanel("Select method",
-                                     sidebarLayout(
-                                       sidebarPanel(
-                                         h3("Select preprocessing options"),
-                                         h4("Select software for analysing your screen"),
-                                         selectInput(
-                                           "software", "",
-                                           choices = c("", "MAGeCK", "edgeR"), selected = NULL
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.software == 'edgeR'",
-                                           h3("Create edgeR data object"),
-                                           actionButton("create_dgelist", "Create DGEList"),
-                                           h3("Check the quality of the experiment"),
-                                           selectInput(
-                                             "quality_check", "",
-                                             choices = c(
-                                               "", "View guides distribution",
-                                               "View guide distribution per gene",
-                                               "View gene abundances across samples"
-                                             ),
-                                             selected = NULL
-                                           ),
-                                           conditionalPanel(
-                                             condition = "input.quality_check == 'View guide distribution per gene'",
-                                             selectizeInput(
-                                               "selected_gene",
-                                               "Select or Enter Gene Symbol:",
-                                               choices = NULL,  # Choices will be updated dynamically
-                                               multiple = FALSE,
-                                               options = list(
-                                                 placeholder = 'Type to search for a gene...',
-                                                 maxOptions = 1000,
-                                                 allowEmptyOption = TRUE
-                                               )
-                                             )
-                                           ),
-                                           conditionalPanel(
-                                             condition = "input.quality_check == 'View gene abundances across samples'",
-                                             selectizeInput(
-                                               "selected_gene1",
-                                               "Select or Enter Gene Symbol:",
-                                               choices = NULL,  # Choices will be updated dynamically
-                                               multiple = FALSE,
-                                               options = list(
-                                                 placeholder = 'Type to search for a gene...',
-                                                 maxOptions = 1000,
-                                                 allowEmptyOption = TRUE
-                                               )
-                                             )
-                                           )
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.software == 'MAGeCK'",
-                                           actionButton("create_dgelist", "Create DGEList"),
-                                           h3("Check the quality of the experiment"),
-                                           selectInput(
-                                             "quality_check", "",
-                                             choices = c(
-                                               "", "View guides distribution",
-                                               "View guide distribution per gene",
-                                               "View gene abundances across samples"
-                                             ),
-                                             selected = NULL
-                                           ),
-                                           conditionalPanel(
-                                             condition = "input.quality_check == 'View guide distribution per gene'",
-                                             selectizeInput(
-                                               "selected_gene",
-                                               "Select or Enter Gene Symbol:",
-                                               choices = NULL,  # Choices will be updated dynamically
-                                               multiple = FALSE,
-                                               options = list(
-                                                 placeholder = 'Type to search for a gene...',
-                                                 maxOptions = 1000,
-                                                 allowEmptyOption = TRUE
-                                               )
-                                             )
-                                           ),
-                                           conditionalPanel(
-                                             condition = "input.quality_check == 'View gene abundances across samples'",
-                                             selectizeInput(
-                                               "selected_gene1",
-                                               "Select or Enter Gene Symbol:",
-                                               choices = NULL,  # Choices will be updated dynamically
-                                               multiple = FALSE,
-                                               options = list(
-                                                 placeholder = 'Type to search for a gene...',
-                                                 maxOptions = 1000,
-                                                 allowEmptyOption = TRUE
-                                               )
-                                             )
-                                           )
-                                         )
-                                       ),
-                                       mainPanel(
-                                         textOutput("dgelist_status"),
-                                         verbatimTextOutput("dge_list_output"),
-                                         conditionalPanel(
-                                           condition = "input.quality_check == 'View guides distribution'",
-                                           h3("The distribution of SgRNA numbers"),
-                                           plotOutput("guide_distribution"),
-                                           uiOutput("download_guide_distribution_button")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.quality_check == 'View guide distribution per gene'",
-                                           h3("The distribution of guides per gene"),
-                                           plotOutput("guide_distribution_per_gene"),
-                                           uiOutput("download_guide_distribution_per_gene_button")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.quality_check == 'View gene abundances across samples'",
-                                           h4("The distribution of gene abundances"),
-                                           plotOutput("gene_abundance_distribution"),
-                                           uiOutput("download_gene_abundance_distribution_button")
-                                         )
-                                       )
-                                     )
-                            ),
-                            tabPanel("Filtering",
-                                     sidebarLayout(
-                                       sidebarPanel(
-                                         helpText("The filtering options may take up to 1 minute to load. Please don't leave this page. "),
-                                         uiOutput("filter3_drop_down"),
-                                         conditionalPanel(
-                                           condition= "typeof input.filter3_what !== 'undefined' && input.filter3_what.length > 0",
-                                           selectInput("filter_what", label = h4("Filter Type"),
-                                                       choices = list("No Filter" = "none",
-                                                                      "Filter Out all Zeros Counts" = "zero",
-                                                                      "edgeR FilterByExpr" = "edgeR",
-                                                                      "New Filter" = "filter3")),
-                                           checkboxInput("all_filters", label = "Show results for all filters", value = FALSE),
-                                           checkboxInput("show_mds", label = "Show MDS plot", value = FALSE)
-                                         )
-                                       ),
-                                       mainPanel(
-                                         h3("Filtering"),
-                                         conditionalPanel(
-                                           condition = "! output.fileUploaded",
-                                           helpText("Please upload your data under 'Data Quality Check' ")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "  input.all_filters==0 & input.show_mds==0 &  input.filter3_what.length > 0",
-                                           fluidRow(
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_density"), plotOutput("filtered_density")),
-                                             splitLayout(cellWidths = c("50%", "50%"), uiOutput("download_raw_dens_button"), uiOutput("download_filtered_dens_button"))
-                                           )
-                                         ),
-                                         conditionalPanel(
-                                           condition = "  input.all_filters==0 & input.show_mds==1",
-                                           fluidRow(
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_mds"), plotOutput("filtered_mds")),
-                                             splitLayout(cellWidths = c("50%", "50%"), uiOutput("download_raw_mds_plot_button"), uiOutput("download_filtered_mds_plot_button"))
-                                           )
-                                         ),
-                                         conditionalPanel(
-                                           condition = "  input.all_filters==1 & input.show_mds==0",
-                                           fluidRow(
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_density2"), plotOutput("filtered_density_zero")),
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("filtered_density_edgeR"), plotOutput("filtered_density_f3")),
-                                             uiOutput("download_all_dens_button")
-                                           )
-                                         ),
-                                         conditionalPanel(
-                                           condition = "  input.all_filters==1 & input.show_mds==1",
-                                           fluidRow(
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_mds2"), plotOutput("zero_mds_plot")),
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("edgeR_mds_plot"), plotOutput("f3_mds_plot")),
-                                             uiOutput("download_all_mds_button")
-                                           )
-                                         ),
-                                         uiOutput("to_norm")
-                                       )
-                                     )
-                            ),
-                            tabPanel("Normalisation",
-                                     sidebarLayout(
-                                       sidebarPanel(
-                                         selectInput("norm_what", label = h4("Normalisation Type"),
-                                                     choices = list("TMM",
-                                                                    "TMMwsp",
-                                                                    "RLE",
-                                                                    "upperquartile",
-                                                                    "none")),
-                                         uiOutput("norm_quant"),
-                                         checkboxInput("all_norms", label = "Show results for all normalisation methods", value = FALSE),
-                                         checkboxInput("imputation", label = "Impute before normalisation", value = FALSE)
-                                       ),
-                                       mainPanel(
-                                         h3("Normalisation"),
-                                         conditionalPanel(
-                                           condition = "! output.fileUploaded",
-                                           helpText("Please upload your data under 'Data Quality Check' ")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.all_norms==0 ",
-                                           fluidRow(
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_dge_none"), plotOutput("normed_dge")),
-                                             splitLayout(cellWidths = c("50%", "50%"),  uiOutput("download_none_dge_box_button"), uiOutput("download_normed_dge_box_button"))
-                                           )
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.all_norms==1 ",
-                                           fluidRow(
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_none"), plotOutput("norm_box_tmm")),
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_tmmwsp"), plotOutput("norm_box_RLE")),
-                                             splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_quant")),
-                                             uiOutput("download_all_norm_button")
-                                           )
-                                         ),
-                                         uiOutput("to_dim")
-                                       )
-                                     )
-                            )
-                 ),
-                 navbarMenu("Analysis",
-                            tabPanel("Fitting model",
-                                     sidebarLayout(
-                                       sidebarPanel(
-                                         checkboxInput("bcv", label = "Show BCV plot", value = FALSE),
-                                         helpText("It can take up to 2 minutes to generate the BCV plot or fit the model.
-                Once you select this checkbox, please don't leave this page until you see the result."),
-                                         selectInput("model", label = h4("Select model"),
-                                                     choices = list("Ebayes",
-                                                                    "Generalised Linear Model",
-                                                                    "Generalised Linear Model (Quasi Likelihood)"))
-                                       ),
-                                       mainPanel(
-                                         h3("Fitting model"),
-                                         conditionalPanel(condition = " input.bcv == '1' ",
-                                                          plotOutput("plot_bcv_disp"),
-                                                          uiOutput("download_bcv_button")
-                                         ),
-                                         conditionalPanel(condition = "! output.fileUploaded",
-                                                          helpText("Please upload your data under 'Data Quality Check' ")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Ebayes' ",
-                                                          dataTableOutput("limma_table"),
-                                                          uiOutput("download_limma_table_button")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Generalised Linear Model' ",
-                                                          dataTableOutput("edgeR_table_lrt"),
-                                                          uiOutput("download_lrt_table_button")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' ",
-                                                          dataTableOutput("edgeR_table_qlf"),
-                                                          uiOutput("download_qlf_table_button")
-                                         ),
-                                         uiOutput("to_de")
-                                       )
-                                     ),
-                            ),
-                            tabPanel("DE genes",
-                                     sidebarLayout(
-                                       sidebarPanel(
-                                         selectInput("DE_check", label = NULL,
-                                                     choices = list("Check DE genes in each contrast",
-                                                                    "Compare DE genes in different contrasts")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.DE_check == 'Check DE genes in each contrast' ",
-                                           uiOutput("ind_contrast")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.DE_check == 'Compare DE genes in different contrasts' ",
-                                           uiOutput("contrast1"),
-                                           uiOutput("contrast2")
-                                         )
-                                       ),
-                                       mainPanel(
-                                         h3("Examine differentially expressed genes"),
-                                         conditionalPanel(condition = "! output.fileUploaded",
-                                                          helpText("Please upload your data under 'Data Quality Check' ")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Ebayes' && input.DE_check == 'Compare DE genes in different contrasts' ",
-                                                          plotOutput("limma_ven"),
-                                                          uiOutput("download_limma_ven_button"),
-                                                          dataTableOutput("limma_com_gene"),
-                                                          uiOutput("download_limma_com_button")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Ebayes' && input.DE_check == 'Check DE genes in each contrast' ",
-                                                          fluidRow(plotOutput("limma_md")),
-                                                          uiOutput("download_limma_md_button"),
-                                                          (plotOutput("limma_heatmap", height=700)),
-                                                          uiOutput("download_limma_heatmap_button")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.model == 'Generalised Linear Model' && input.DE_check == 'Compare DE genes in different contrasts' ",
-                                           plotOutput("edgeR_ven_lrt"),
-                                           uiOutput("download_lrt_ven_button"),
-                                           dataTableOutput("edgeR_com_gene_lrt"),
-                                           uiOutput("download_lrt_com_button")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' && input.DE_check == 'Compare DE genes in different contrasts' ",
-                                           plotOutput("edgeR_ven_qlf"),
-                                           uiOutput("download_qlf_ven_button"),
-                                           dataTableOutput("edgeR_com_gene_qlf"),
-                                           uiOutput("download_qlf_com_button")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Generalised Linear Model' && input.DE_check == 'Check DE genes in each contrast' ",
-                                                          plotOutput("edgeR_md_lrt"),
-                                                          uiOutput("download_lrt_md_button"),
-                                                          plotOutput("edgeR_heatmap_lrt", height=800),
-                                                          uiOutput("download_lrt_heatmap_button")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' && input.DE_check == 'Check DE genes in each contrast' ",
-                                                          plotOutput("edgeR_md_qlf"),
-                                                          uiOutput("download_qlf_md_button"),
-                                                          plotOutput("edgeR_heatmap_qlf", height=800),
-                                                          uiOutput("download_qlf_heatmap_button")
-                                         ),
-                                         uiOutput("to_gene_set")
-                                       )
-                                     ),
-                            ),
-                            tabPanel("Gene set test",
-                                     sidebarLayout(
-                                       sidebarPanel(
-                                         p("For the gene test, we focus on genes that has number
-            of guides greater than or equal the threshold:"),
-                                         numericInput("gene_threshold", label = h4("Enter threshold"), value = 3, step = 1, min=2),
-                                         uiOutput("gene_set_contrast"),
-                                         uiOutput('gene_set_down')
-                                         #selectizeInput('gene_set_down', label = h4("Select gene"), choices = NULL)
-                                       ),
-                                       mainPanel(
-                                         h3("Gene test"),
-                                         textOutput("gene_set_fail"),
-                                         dataTableOutput("gene_set_table"),
-                                         uiOutput("download_gene_set_table_button"),
-                                         conditionalPanel(condition = "input.model == 'Ebayes' ",
-                                                          plotOutput("limma_barcode_plot"),
-                                                          uiOutput("download_limma_barcode_plot_button")
-                                         ),
-                                         conditionalPanel(condition = "input.model == 'Generalised Linear Model' ",
-                                                          plotOutput("lrt_barcode_plot"),
-                                                          uiOutput("download_lrt_barcode_plot_button")
-                                         ),
-                                         conditionalPanel(
-                                           condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' ",
-                                           plotOutput("qlf_barcode_plot"),
-                                           uiOutput("download_qlf_barcode_plot_button")
-                                         )
-                                       )
-                                     )
-                            )
-                 )
+
+  # Preprocessing Tab with Sidebar
+  tabPanel("Preprocessing",
+    sidebarLayout(
+      sidebarPanel(
+        # Select Software for Analyzing the Screen
+        h4("Select Software for Analyzing Your Screen"),
+        selectInput(
+          "software", "",
+          choices = c("", "MAGeCK", "edgeR"), selected = NULL
+        ),
+
+        # Select Method Sub-Tab
+        conditionalPanel(
+          condition = "input.software == 'edgeR'",
+          h3("Create edgeR Data Object"),
+          actionButton("create_dgelist", "Create DGEList"),
+          h3("Check the Quality of the Experiment"),
+          selectInput(
+            "quality_check", "",
+            choices = c(
+              "", "View guides distribution",
+              "View guide distribution per gene",
+              "View gene abundances across samples"
+            ),
+            selected = NULL
+          ),
+          conditionalPanel(
+            condition = "input.quality_check == 'View guide distribution per gene'",
+            selectizeInput(
+              "selected_gene",
+              "Select or Enter Gene Symbol:",
+              choices = NULL,
+              multiple = FALSE,
+              options = list(
+                placeholder = 'Type to search for a gene...',
+                maxOptions = 1000,
+                allowEmptyOption = TRUE
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.quality_check == 'View gene abundances across samples'",
+            selectizeInput(
+              "selected_gene1",
+              "Select or Enter Gene Symbol:",
+              choices = NULL,
+              multiple = FALSE,
+              options = list(
+                placeholder = 'Type to search for a gene...',
+                maxOptions = 1000,
+                allowEmptyOption = TRUE
+              )
+            )
+          )
+        ),
+
+        conditionalPanel(
+          condition = "input.software == 'MAGeCK'",
+          actionButton("create_dgelist", "Create DGEList"),
+          h3("Check the Quality of the Experiment"),
+          selectInput(
+            "quality_check", "",
+            choices = c(
+              "", "View guides distribution",
+              "View guide distribution per gene",
+              "View gene abundances across samples"
+            ),
+            selected = NULL
+          ),
+          conditionalPanel(
+            condition = "input.quality_check == 'View guide distribution per gene'",
+            selectizeInput(
+              "selected_gene",
+              "Select or Enter Gene Symbol:",
+              choices = NULL,
+              multiple = FALSE,
+              options = list(
+                placeholder = 'Type to search for a gene...',
+                maxOptions = 1000,
+                allowEmptyOption = TRUE
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.quality_check == 'View gene abundances across samples'",
+            selectizeInput(
+              "selected_gene1",
+              "Select or Enter Gene Symbol:",
+              choices = NULL,
+              multiple = FALSE,
+              options = list(
+                placeholder = 'Type to search for a gene...',
+                maxOptions = 1000,
+                allowEmptyOption = TRUE
+              )
+            )
+          )
+        ),
+
+        # Filtering Section
+        h4("Filtering Options"),
+        helpText("The filtering options may take up to 1 minute to load. Please don't leave this page."),
+        uiOutput("filter3_drop_down"),
+        conditionalPanel(
+          condition = "typeof input.filter3_what !== 'undefined' && input.filter3_what.length > 0",
+          selectInput("filter_what", label = h4("Filter Type"),
+                      choices = list("No Filter" = "none",
+                                     "Filter Out all Zeros Counts" = "zero",
+                                     "edgeR FilterByExpr" = "edgeR",
+                                     "New Filter" = "filter3")),
+          checkboxInput("all_filters", label = "Show results for all filters", value = FALSE),
+          checkboxInput("show_mds", label = "Show MDS plot", value = FALSE)
+        ),
+
+        # Normalisation Section
+        h4("Normalisation Options"),
+        selectInput("norm_what", label = h4("Normalisation Type"),
+                    choices = list("TMM",
+                                   "TMMwsp",
+                                   "RLE",
+                                   "upperquartile",
+                                   "none")),
+        uiOutput("norm_quant"),
+        checkboxInput("all_norms", label = "Show results for all normalisation methods", value = FALSE),
+        checkboxInput("imputation", label = "Impute before normalisation", value = FALSE)
+      ),
+
+      mainPanel(
+        textOutput("dgelist_status"),
+        verbatimTextOutput("dge_list_output"),
+
+        # Conditional panels based on quality check selection
+        conditionalPanel(
+          condition = "input.quality_check == 'View guides distribution'",
+          h3("The distribution of SgRNA numbers"),
+          plotOutput("guide_distribution"),
+          uiOutput("download_guide_distribution_button")
+        ),
+        conditionalPanel(
+          condition = "input.quality_check == 'View guide distribution per gene'",
+          h3("The distribution of guides per gene"),
+          plotOutput("guide_distribution_per_gene"),
+          uiOutput("download_guide_distribution_per_gene_button")
+        ),
+        conditionalPanel(
+          condition = "input.quality_check == 'View gene abundances across samples'",
+          h4("The distribution of gene abundances"),
+          plotOutput("gene_abundance_distribution"),
+          uiOutput("download_gene_abundance_distribution_button")
+        ),
+
+        # Filtering results
+        conditionalPanel(
+          condition = "! output.fileUploaded",
+          helpText("Please upload your data under 'Data Quality Check'")
+        ),
+        conditionalPanel(
+          condition = "input.all_filters == 0 & input.show_mds == 0 & input.filter3_what.length > 0",
+          fluidRow(
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_density"), plotOutput("filtered_density")),
+            splitLayout(cellWidths = c("50%", "50%"), uiOutput("download_raw_dens_button"), uiOutput("download_filtered_dens_button"))
+          )
+        ),
+        conditionalPanel(
+          condition = "input.all_filters == 0 & input.show_mds == 1",
+          fluidRow(
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_mds"), plotOutput("filtered_mds")),
+            splitLayout(cellWidths = c("50%", "50%"), uiOutput("download_raw_mds_plot_button"), uiOutput("download_filtered_mds_plot_button"))
+          )
+        ),
+        conditionalPanel(
+          condition = "input.all_filters == 1 & input.show_mds == 0",
+          fluidRow(
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_density2"), plotOutput("filtered_density_zero")),
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("filtered_density_edgeR"), plotOutput("filtered_density_f3")),
+            uiOutput("download_all_dens_button")
+          )
+        ),
+        conditionalPanel(
+          condition = "input.all_filters == 1 & input.show_mds == 1",
+          fluidRow(
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("raw_mds2"), plotOutput("zero_mds_plot")),
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("edgeR_mds_plot"), plotOutput("f3_mds_plot")),
+            uiOutput("download_all_mds_button")
+          )
+        ),
+        uiOutput("to_norm"),
+
+        # Normalisation results
+        conditionalPanel(
+          condition = "! output.fileUploaded",
+          helpText("Please upload your data under 'Data Quality Check'")
+        ),
+        conditionalPanel(
+          condition = "input.all_norms == 0",
+          fluidRow(
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_dge_none"), plotOutput("normed_dge")),
+            splitLayout(cellWidths = c("50%", "50%"), uiOutput("download_none_dge_box_button"), uiOutput("download_normed_dge_box_button"))
+          )
+        ),
+        conditionalPanel(
+          condition = "input.all_norms == 1",
+          fluidRow(
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_none"), plotOutput("norm_box_tmm")),
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_tmmwsp"), plotOutput("norm_box_RLE")),
+            splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_quant")),
+            uiOutput("download_all_norm_button")
+          )
+        ),
+        uiOutput("to_dim")
+      )
+    )
+  ),
+tabPanel("Analysis",
+  sidebarLayout(
+    sidebarPanel(
+      # Fitting Model Section
+      h4("Fitting Model Options"),
+      checkboxInput("bcv", label = "Show BCV plot", value = FALSE),
+      helpText("It can take up to 2 minutes to generate the BCV plot or fit the model. Once you select this checkbox, please don't leave this page until you see the result."),
+      selectInput("model", label = h4("Select model"),
+                  choices = list("Ebayes", "Generalised Linear Model", "Generalised Linear Model (Quasi Likelihood)")),
+
+      # DE Genes Section
+      h4("Differential Expression Genes"),
+      selectInput("DE_check", label = NULL,
+                  choices = list("Check DE genes in each contrast",
+                                 "Compare DE genes in different contrasts")
+      ),
+      conditionalPanel(
+        condition = "input.DE_check == 'Check DE genes in each contrast'",
+        uiOutput("ind_contrast")
+      ),
+      conditionalPanel(
+        condition = "input.DE_check == 'Compare DE genes in different contrasts'",
+        uiOutput("contrast1"),
+        uiOutput("contrast2")
+      ),
+
+      # Gene Set Test Section
+      h4("Gene Set Test"),
+      p("For the gene test, we focus on genes that have a number of guides greater than or equal to the threshold:"),
+      numericInput("gene_threshold", label = h4("Enter threshold"), value = 3, step = 1, min = 2),
+      uiOutput("gene_set_contrast"),
+      uiOutput('gene_set_down')
+    ),
+    mainPanel(
+      # Fitting Model Outputs
+      h3("Fitting Model"),
+      conditionalPanel(condition = "input.bcv == '1'",
+                       plotOutput("plot_bcv_disp"),
+                       uiOutput("download_bcv_button")
+      ),
+      conditionalPanel(condition = "! output.fileUploaded",
+                       helpText("Please upload your data under 'Data Quality Check'")
+      ),
+      conditionalPanel(condition = "input.model == 'Ebayes'",
+                       dataTableOutput("limma_table"),
+                       uiOutput("download_limma_table_button")
+      ),
+      conditionalPanel(condition = "input.model == 'Generalised Linear Model'",
+                       dataTableOutput("edgeR_table_lrt"),
+                       uiOutput("download_lrt_table_button")
+      ),
+      conditionalPanel(condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)'",
+                       dataTableOutput("edgeR_table_qlf"),
+                       uiOutput("download_qlf_table_button")
+      ),
+      uiOutput("to_de"),
+
+      # DE Genes Outputs
+      h3("Examine Differentially Expressed Genes"),
+      conditionalPanel(condition = "! output.fileUploaded",
+                       helpText("Please upload your data under 'Data Quality Check'")
+      ),
+      conditionalPanel(condition = "input.model == 'Ebayes' && input.DE_check == 'Compare DE genes in different contrasts'",
+                       plotOutput("limma_ven"),
+                       uiOutput("download_limma_ven_button"),
+                       dataTableOutput("limma_com_gene"),
+                       uiOutput("download_limma_com_button")
+      ),
+      conditionalPanel(condition = "input.model == 'Ebayes' && input.DE_check == 'Check DE genes in each contrast'",
+                       fluidRow(plotOutput("limma_md")),
+                       uiOutput("download_limma_md_button"),
+                       plotOutput("limma_heatmap", height = 700),
+                       uiOutput("download_limma_heatmap_button")
+      ),
+      conditionalPanel(
+        condition = "input.model == 'Generalised Linear Model' && input.DE_check == 'Compare DE genes in different contrasts'",
+        plotOutput("edgeR_ven_lrt"),
+        uiOutput("download_lrt_ven_button"),
+        dataTableOutput("edgeR_com_gene_lrt"),
+        uiOutput("download_lrt_com_button")
+      ),
+      conditionalPanel(
+        condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' && input.DE_check == 'Compare DE genes in different contrasts'",
+        plotOutput("edgeR_ven_qlf"),
+        uiOutput("download_qlf_ven_button"),
+        dataTableOutput("edgeR_com_gene_qlf"),
+        uiOutput("download_qlf_com_button")
+      ),
+      conditionalPanel(condition = "input.model == 'Generalised Linear Model' && input.DE_check == 'Check DE genes in each contrast'",
+                       plotOutput("edgeR_md_lrt"),
+                       uiOutput("download_lrt_md_button"),
+                       plotOutput("edgeR_heatmap_lrt", height = 800),
+                       uiOutput("download_lrt_heatmap_button")
+      ),
+      conditionalPanel(condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' && input.DE_check == 'Check DE genes in each contrast'",
+                       plotOutput("edgeR_md_qlf"),
+                       uiOutput("download_qlf_md_button"),
+                       plotOutput("edgeR_heatmap_qlf", height = 800),
+                       uiOutput("download_qlf_heatmap_button")
+      ),
+      uiOutput("to_gene_set"),
+
+      # Gene Set Test Outputs
+      h3("Gene Set Test"),
+      textOutput("gene_set_fail"),
+      dataTableOutput("gene_set_table"),
+      uiOutput("download_gene_set_table_button"),
+      conditionalPanel(condition = "input.model == 'Ebayes'",
+                       plotOutput("limma_barcode_plot"),
+                       uiOutput("download_limma_barcode_plot_button")
+      ),
+      conditionalPanel(condition = "input.model == 'Generalised Linear Model'",
+                       plotOutput("lrt_barcode_plot"),
+                       uiOutput("download_lrt_barcode_plot_button")
+      ),
+      conditionalPanel(
+        condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)'",
+        plotOutput("qlf_barcode_plot"),
+        uiOutput("download_qlf_barcode_plot_button")
+      )
+    )
+  )
+)
+
 )
 
 # Define server logic
 server <- function(input, output, session) {
+  # Modals ####
+  # Modal for Step 1
+  observeEvent(input$showModal1, {
+    showModal(modalDialog(
+      title = "Enter the details of the experiment",
+      "Please upload your guide library, sample information and count matrix or fastq files.",
+      easyClose = TRUE,
+      footer = modalButton("Close")
+    ))
+    runjs('Shiny.setInputValue("showModal1", null)')  # Reset the input value
+  })
+  # Modal for Step 2
+  observeEvent(input$showModal2, {
+    showModal(modalDialog(
+      title = "Guide RNA Library Details",
+       "Please make sure that the file you're uploading follows the required format.
+       The column names in your file should be:
+       - 'SgRNA_ID' (the identifier for each guide),
+       - 'SgRNA_Sequence' (the sequence of the guide RNA),
+       - 'Gene_ID' (the identifier for the gene targeted by the guide).",
+      easyClose = TRUE,
+      footer = modalButton("Close")
+    ))
+    runjs('Shiny.setInputValue("showModal2", null)')  # Reset the input value
+  })
 
+  observeEvent(input$showModal3, {
+    showModal(modalDialog(
+      title = "Sample Information Upload Details",
+         "Please make sure that the file you're uploading follows the required format.
+         The column names in your file should be:
+         - 'Fastqnames' (the name of the fastq file),
+         - 'Groups' (the experimental groups),
+         - 'Biorep' (biological replicate),
+         - 'Techrep' (technical replicate).",
+      easyClose = TRUE,
+      footer = modalButton("Close")
+    ))
+    runjs('Shiny.setInputValue("showModal3", null)')  # Reset the input value to allow multiple clicks
+  })
+
+  observeEvent(input$showModal4, {
+    showModal(modalDialog(
+      title = "Count Matrix Upload Details",
+         "Please make sure that the file you're uploading follows the required format.
+         The column names in your file should be:
+         - 'SgRNA_Sequence' (the sequence of the guide RNA),
+         - 'Gene_ID' (the gene ID),
+         - Sample names (the expression values across the samples).",
+      easyClose = TRUE,
+      footer = modalButton("Close")
+    ))
+    runjs('Shiny.setInputValue("showModal4", null)')  # Reset the input value to allow multiple clicks
+  })
+
+  observeEvent(input$showModal5, {
+    showModal(modalDialog(
+      title = "Fastq Files Upload Details",
+         "Please make sure that the files you're uploading are in the correct format.
+         Ensure that the fastq files are named properly and that they are paired if necessary.",
+      easyClose = TRUE,
+      footer = modalButton("Close")
+    ))
+
+    # Reset input after modal is shown (this allows multiple clicks)
+    runjs('Shiny.setInputValue("showModal5", null)')  # Reset the input value to allow multiple clicks
+  })
   #Functions ####
   # x labels: group names + Biorep + Techrep
   get_x_lab <- function(dge){
@@ -1127,7 +1195,6 @@ server <- function(input, output, session) {
     zero_mds()
   })
 
-
   all_mds <- function(){
     par(mfrow=c(2,2))
     raw_mds_plot()
@@ -1146,7 +1213,6 @@ server <- function(input, output, session) {
       dev.off()
     }
   )
-
 
   output$download_all_mds_button <- renderUI({
     req(filtered_dens_f3())
