@@ -10,14 +10,13 @@ ui <- navbarPage("CuReSPR",
                  tabPanel("Data Upload",
                           sidebarLayout(
                             sidebarPanel(
-                              # Add footer with text and image (positioned at the top of the page)
                               tags$div(
                                 style = "position: fixed; top: 0; right: 0; width: auto; text-align: center; background-color: #428bca; padding: 10px; z-index: 1000; color: white;",
                                 tags$span("This website is supported by     "),
                                 tags$img(src = "cass.png", height = "30px", width = "auto")
                               ),
                               # Modal 1: Enter Experimental Design
-                              h3(tags$a("Enter the details of the experiment",
+                              h2(tags$a("Enter the details of the experiment",
                                         href = "#", onclick = "Shiny.setInputValue('showModal1', true);"
                                         )),
                               helpText("Click the title above for detailed instructions."),
@@ -113,12 +112,12 @@ ui <- navbarPage("CuReSPR",
                  tabPanel("Counting",
                           sidebarLayout(
                             sidebarPanel(
-                              h4("Select method of counting"),
-                              selectInput(inputId = "method",
-                                          label = "",
-                                          choices = c("Rsubread", "MAGeCK", "WEHI")
-                              ),
-                              actionButton(inputId = "guidecounts", "Get the guide counts")
+                                          # Modal 6:
+                                          h3(tags$a("Select a method for counting",
+                                          href = "#", onclick = "Shiny.setInputValue('showModal6', true);")),
+                                          helpText("Click the title above for detailed instructions."),
+                                          selectInput(inputId = "method", label = "", choices = c("Rsubread", "MAGeCK", "WEHI")),
+                                          actionButton(inputId = "guidecounts", "Get the guide counts"),
                             ),
                             mainPanel(
                               conditionalPanel(
@@ -133,127 +132,95 @@ ui <- navbarPage("CuReSPR",
   tabPanel("Preprocessing",
     sidebarLayout(
       sidebarPanel(
-        # Select Software for Analyzing the Screen
-        h4("Select Software for Analyzing Your Screen"),
-        selectInput(
-          "software", "",
-          choices = c("", "MAGeCK", "edgeR"), selected = NULL
-        ),
+                  # Modal 7
+                  h3(tags$a(
+                    "1. Create a data object",
+                    href = "#", onclick = "Shiny.setInputValue('showModal7', true);"
+                  )),
+                  helpText("Click the title above for detailed instructions."),
+                  actionButton("create_dgelist", "Create data object"),
 
-        # Select Method Sub-Tab
-        conditionalPanel(
-          condition = "input.software == 'edgeR'",
-          h3("Create edgeR Data Object"),
-          actionButton("create_dgelist", "Create DGEList"),
-          h3("Check the Quality of the Experiment"),
-          selectInput(
-            "quality_check", "",
-            choices = c(
-              "", "View guides distribution",
-              "View guide distribution per gene",
-              "View gene abundances across samples"
-            ),
-            selected = NULL
-          ),
-          conditionalPanel(
-            condition = "input.quality_check == 'View guide distribution per gene'",
-            selectizeInput(
-              "selected_gene",
-              "Select or Enter Gene Symbol:",
-              choices = NULL,
-              multiple = FALSE,
-              options = list(
-                placeholder = 'Type to search for a gene...',
-                maxOptions = 1000,
-                allowEmptyOption = TRUE
-              )
-            )
-          ),
-          conditionalPanel(
-            condition = "input.quality_check == 'View gene abundances across samples'",
-            selectizeInput(
-              "selected_gene1",
-              "Select or Enter Gene Symbol:",
-              choices = NULL,
-              multiple = FALSE,
-              options = list(
-                placeholder = 'Type to search for a gene...',
-                maxOptions = 1000,
-                allowEmptyOption = TRUE
-              )
-            )
-          )
-        ),
-
-        conditionalPanel(
-          condition = "input.software == 'MAGeCK'",
-          actionButton("create_dgelist", "Create DGEList"),
-          h3("Check the Quality of the Experiment"),
-          selectInput(
-            "quality_check", "",
-            choices = c(
-              "", "View guides distribution",
-              "View guide distribution per gene",
-              "View gene abundances across samples"
-            ),
-            selected = NULL
-          ),
-          conditionalPanel(
-            condition = "input.quality_check == 'View guide distribution per gene'",
-            selectizeInput(
-              "selected_gene",
-              "Select or Enter Gene Symbol:",
-              choices = NULL,
-              multiple = FALSE,
-              options = list(
-                placeholder = 'Type to search for a gene...',
-                maxOptions = 1000,
-                allowEmptyOption = TRUE
-              )
-            )
-          ),
-          conditionalPanel(
-            condition = "input.quality_check == 'View gene abundances across samples'",
-            selectizeInput(
-              "selected_gene1",
-              "Select or Enter Gene Symbol:",
-              choices = NULL,
-              multiple = FALSE,
-              options = list(
-                placeholder = 'Type to search for a gene...',
-                maxOptions = 1000,
-                allowEmptyOption = TRUE
-              )
-            )
-          )
-        ),
-
+                  # Modal 8
+                  h3(tags$a(
+                    "2. Check the quality of the experiment",
+                    href = "#", onclick = "Shiny.setInputValue('showModal8', true);"
+                  )),
+                  helpText("Click the title above for detailed instructions."),
+                  selectInput(
+                    "quality_check", "",
+                    choices = c(
+                      "", "View guides distribution",
+                      "View guide distribution per gene",
+                      "View gene abundances across samples"
+                    ),
+                    selected = NULL
+                  ),
+                  conditionalPanel(
+                    condition = "input.quality_check == 'View guide distribution per gene'",
+                    selectizeInput(
+                      "selected_gene",
+                      "Select or Enter Gene Symbol:",
+                      choices = NULL,
+                      multiple = FALSE,
+                      options = list(
+                        placeholder = 'Type to search for a gene...',
+                        maxOptions = 1000,
+                        allowEmptyOption = TRUE
+                      )
+                    )
+                  ),
+                  conditionalPanel(
+                    condition = "input.quality_check == 'View gene abundances across samples'",
+                    selectizeInput(
+                      "selected_gene1",
+                      "Select or Enter Gene Symbol:",
+                      choices = NULL,
+                      multiple = FALSE,
+                      options = list(
+                        placeholder = 'Type to search for a gene...',
+                        maxOptions = 1000,
+                        allowEmptyOption = TRUE
+                      )
+                    )
+                  ),
         # Filtering Section
-        h4("Filtering Options"),
-        helpText("The filtering options may take up to 1 minute to load. Please don't leave this page."),
+        # Modal 9:
+        h3(tags$a("3. Filtering", href = "#", onclick = "Shiny.setInputValue('showModal9', true);" )),
+        helpText("Click the title above for detailed instructions."),
+
+        # Modal 10
+        h4(tags$a("Select control groups",href = "#", onclick = "Shiny.setInputValue('showModal10', true);")),
+        helpText("Click the title above for detailed instructions."),
         uiOutput("filter3_drop_down"),
         conditionalPanel(
           condition = "typeof input.filter3_what !== 'undefined' && input.filter3_what.length > 0",
           selectInput("filter_what", label = h4("Filter Type"),
                       choices = list("No Filter" = "none",
                                      "Filter Out all Zeros Counts" = "zero",
-                                     "edgeR FilterByExpr" = "edgeR",
-                                     "New Filter" = "filter3")),
+                                     "Strict filtering" = "edgeR",
+                                     "Permissive filtering" = "edgeR2",
+                                     "Cancer sensitive filtering" = "filter3")),
           checkboxInput("all_filters", label = "Show results for all filters", value = FALSE),
           checkboxInput("show_mds", label = "Show MDS plot", value = FALSE)
         ),
 
         # Normalisation Section
-        h4("Normalisation Options"),
+        # Modal 11
+        h3(tags$a(
+          "4. Normalisation",
+          href = "#", onclick = "Shiny.setInputValue('showModal11', true);"
+        )),
+        helpText("Click the title above for detailed instructions."),
         selectInput("norm_what", label = h4("Normalisation Type"),
-                    choices = list("TMM",
+                    choices = list(
+                                   "none",
+                                   "TMM",
                                    "TMMwsp",
                                    "RLE",
-                                   "upperquartile",
-                                   "none")),
+                                   "upperquartile"
+                                   )),
         uiOutput("norm_quant"),
         checkboxInput("all_norms", label = "Show results for all normalisation methods", value = FALSE),
-        checkboxInput("imputation", label = "Impute before normalisation", value = FALSE)
       ),
 
       mainPanel(
@@ -281,10 +248,6 @@ ui <- navbarPage("CuReSPR",
         ),
 
         # Filtering results
-        conditionalPanel(
-          condition = "! output.fileUploaded",
-          helpText("Please upload your data under 'Data Quality Check'")
-        ),
         conditionalPanel(
           condition = "input.all_filters == 0 & input.show_mds == 0 & input.filter3_what.length > 0",
           fluidRow(
@@ -319,10 +282,6 @@ ui <- navbarPage("CuReSPR",
 
         # Normalisation results
         conditionalPanel(
-          condition = "! output.fileUploaded",
-          helpText("Please upload your data under 'Data Quality Check'")
-        ),
-        conditionalPanel(
           condition = "input.all_norms == 0",
           fluidRow(
             splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_dge_none"), plotOutput("normed_dge")),
@@ -337,23 +296,68 @@ ui <- navbarPage("CuReSPR",
             splitLayout(cellWidths = c("50%", "50%"), plotOutput("norm_box_quant")),
             uiOutput("download_all_norm_button")
           )
-        ),
-        uiOutput("to_dim")
+        )#,
+        #uiOutput("to_dim")
       )
     )
   ),
 tabPanel("Analysis",
   sidebarLayout(
     sidebarPanel(
-      # Fitting Model Section
-      h4("Fitting Model Options"),
+      # Select Software for Analyzing the Screen
+      # Modal 12
+      h3(tags$a(
+          "1. Select the tool for analysing your screen",
+          href = "#", onclick = "Shiny.setInputValue('showModal12', true);"
+      )),
+      helpText("Click the title above for detailed instructions."),
+      selectInput(
+                "software", "",
+                choices = c("edgeR", "MAGeCK")
+              ),
+      conditionalPanel(
+      condition = "input.software == 'MAGeCK'",  # Display when MAGeCK is selected
+      # Empty content for MAGeCK
+      ),
+
+      conditionalPanel(
+        condition = "input.software == 'edgeR'",
+      # Check biological variation
+      # Modal 13
+      h3(tags$a(
+      "2. View biological variation coefficient (BCV) plot",
+      href = "#", onclick = "Shiny.setInputValue('showModal13', true);" )),
+      helpText("Click the title above for detailed instructions."),
       checkboxInput("bcv", label = "Show BCV plot", value = FALSE),
-      helpText("It can take up to 2 minutes to generate the BCV plot or fit the model. Once you select this checkbox, please don't leave this page until you see the result."),
-      selectInput("model", label = h4("Select model"),
+      # Modal 14
+      h3(tags$a(
+          "3. Select the feature you want to analyse",
+          href = "#", onclick = "Shiny.setInputValue('showModal14', true);"
+      )),
+      helpText("Click the title above for detailed instructions."),
+      selectInput(
+                "feature", "",
+                choices = c("Guide level analysis", "Gene level analysis")
+              ),
+      conditionalPanel(
+          condition = "input.feature == 'Guide level analysis'",
+      # Fitting Model Section
+      # Modal 15
+      h3(tags$a(
+      "4. Select a statistical model to fit",
+      href = "#", onclick = "Shiny.setInputValue('showModal15', true);")),
+      helpText("Click the title above for detailed instructions."),
+
+      selectInput("model", "",
                   choices = list("Ebayes", "Generalised Linear Model", "Generalised Linear Model (Quasi Likelihood)")),
 
       # DE Genes Section
-      h4("Differential Expression Genes"),
+      # Modal 16
+      h3(tags$a(
+      "5. Differential expression analysis",
+      href = "#", onclick = "Shiny.setInputValue('showModal16', true);")),
+      helpText("Click the title above for detailed instructions."),
+
       selectInput("DE_check", label = NULL,
                   choices = list("Check DE genes in each contrast",
                                  "Compare DE genes in different contrasts")
@@ -367,44 +371,54 @@ tabPanel("Analysis",
         uiOutput("contrast1"),
         uiOutput("contrast2")
       ),
+      ),
 
-      # Gene Set Test Section
-      h4("Gene Set Test"),
-      p("For the gene test, we focus on genes that have a number of guides greater than or equal to the threshold:"),
-      numericInput("gene_threshold", label = h4("Enter threshold"), value = 3, step = 1, min = 2),
-      uiOutput("gene_set_contrast"),
-      uiOutput('gene_set_down')
+      conditionalPanel(
+          condition = "input.feature == 'Gene level analysis'",
+          # Gene Set Test Section
+          # Modal 17
+          h2(tags$a(
+            "4. Select a threshold",
+            href = "#", onclick = "Shiny.setInputValue('showModal17', true);")),
+            helpText("Click the title above for detailed instructions."),
+          numericInput("gene_threshold", label = h4("Threshold value"), value = 2, step = 1, min = 2),
+          uiOutput("gene_set_contrast"),
+          uiOutput('gene_set_down')
+      )
+      ),
     ),
     mainPanel(
-      # Fitting Model Outputs
-      h3("Fitting Model"),
       conditionalPanel(condition = "input.bcv == '1'",
+                       h2("BCV plot"),
                        plotOutput("plot_bcv_disp"),
                        uiOutput("download_bcv_button")
       ),
-      conditionalPanel(condition = "! output.fileUploaded",
-                       helpText("Please upload your data under 'Data Quality Check'")
+      conditionalPanel(
+          condition = "input.feature == 'Guide level analysis'",
+      conditionalPanel(condition = "input.feature == 'Guide level analysis'",
+                       h2("Guide level analysis results")
       ),
+
       conditionalPanel(condition = "input.model == 'Ebayes'",
+                       h3("Ebayes results for differentially expressed guides"),
                        dataTableOutput("limma_table"),
                        uiOutput("download_limma_table_button")
       ),
       conditionalPanel(condition = "input.model == 'Generalised Linear Model'",
+                       h3("GLM results for differentially expressed guides"),
                        dataTableOutput("edgeR_table_lrt"),
                        uiOutput("download_lrt_table_button")
       ),
       conditionalPanel(condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)'",
+                       h3("GLMQLH results for differentially expressed guides"),
                        dataTableOutput("edgeR_table_qlf"),
                        uiOutput("download_qlf_table_button")
       ),
-      uiOutput("to_de"),
+      #uiOutput("to_de"),
 
       # DE Genes Outputs
-      h3("Examine Differentially Expressed Genes"),
-      conditionalPanel(condition = "! output.fileUploaded",
-                       helpText("Please upload your data under 'Data Quality Check'")
-      ),
       conditionalPanel(condition = "input.model == 'Ebayes' && input.DE_check == 'Compare DE genes in different contrasts'",
+                       h3("Examine Differentially Expressed Genes"),
                        plotOutput("limma_ven"),
                        uiOutput("download_limma_ven_button"),
                        dataTableOutput("limma_com_gene"),
@@ -413,8 +427,8 @@ tabPanel("Analysis",
       conditionalPanel(condition = "input.model == 'Ebayes' && input.DE_check == 'Check DE genes in each contrast'",
                        fluidRow(plotOutput("limma_md")),
                        uiOutput("download_limma_md_button"),
-                       plotOutput("limma_heatmap", height = 700),
-                       uiOutput("download_limma_heatmap_button")
+                       #plotOutput("limma_heatmap", height = 700),
+                       #uiOutput("download_limma_heatmap_button")
       ),
       conditionalPanel(
         condition = "input.model == 'Generalised Linear Model' && input.DE_check == 'Compare DE genes in different contrasts'",
@@ -433,19 +447,22 @@ tabPanel("Analysis",
       conditionalPanel(condition = "input.model == 'Generalised Linear Model' && input.DE_check == 'Check DE genes in each contrast'",
                        plotOutput("edgeR_md_lrt"),
                        uiOutput("download_lrt_md_button"),
-                       plotOutput("edgeR_heatmap_lrt", height = 800),
-                       uiOutput("download_lrt_heatmap_button")
+                       #plotOutput("edgeR_heatmap_lrt", height = 800),
+                       #uiOutput("download_lrt_heatmap_button")
       ),
       conditionalPanel(condition = "input.model == 'Generalised Linear Model (Quasi Likelihood)' && input.DE_check == 'Check DE genes in each contrast'",
                        plotOutput("edgeR_md_qlf"),
                        uiOutput("download_qlf_md_button"),
-                       plotOutput("edgeR_heatmap_qlf", height = 800),
-                       uiOutput("download_qlf_heatmap_button")
+                       #plotOutput("edgeR_heatmap_qlf", height = 800),
+                       #uiOutput("download_qlf_heatmap_button")
+      )
       ),
-      uiOutput("to_gene_set"),
+      #uiOutput("to_gene_set"),
 
       # Gene Set Test Outputs
-      h3("Gene Set Test"),
+      conditionalPanel(
+        condition = "input.feature == 'Gene level analysis'",
+      h2("Gene level analysis results"),
       textOutput("gene_set_fail"),
       dataTableOutput("gene_set_table"),
       uiOutput("download_gene_set_table_button"),
@@ -463,80 +480,362 @@ tabPanel("Analysis",
         uiOutput("download_qlf_barcode_plot_button")
       )
     )
+    )
   )
 )
-
 )
+library(shiny)
 
 # Define server logic
 server <- function(input, output, session) {
   # Modals ####
-  # Modal for Step 1
-  observeEvent(input$showModal1, {
-    showModal(modalDialog(
-      title = "Enter the details of the experiment",
-      "Please upload your guide library, sample information and count matrix or fastq files.",
-      easyClose = TRUE,
-      footer = modalButton("Close")
-    ))
-    runjs('Shiny.setInputValue("showModal1", null)')  # Reset the input value
-  })
-  # Modal for Step 2
-  observeEvent(input$showModal2, {
-    showModal(modalDialog(
-      title = "Guide RNA Library Details",
-       "Please make sure that the file you're uploading follows the required format.
-       The column names in your file should be:
-       - 'SgRNA_ID' (the identifier for each guide),
-       - 'SgRNA_Sequence' (the sequence of the guide RNA),
-       - 'Gene_ID' (the identifier for the gene targeted by the guide).",
-      easyClose = TRUE,
-      footer = modalButton("Close")
-    ))
-    runjs('Shiny.setInputValue("showModal2", null)')  # Reset the input value
-  })
+  # Modal1: Enter the details of the experiment
+observeEvent(input$showModal1, {
+  showModal(modalDialog(
+    title = "Enter the details of the experiment",
+    "Please upload your guide library, sample information and count matrix or fastq files.",
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal1", null)')  # Reset the input value
+})
 
-  observeEvent(input$showModal3, {
-    showModal(modalDialog(
-      title = "Sample Information Upload Details",
-         "Please make sure that the file you're uploading follows the required format.
-         The column names in your file should be:
-         - 'Fastqnames' (the name of the fastq file),
-         - 'Groups' (the experimental groups),
-         - 'Biorep' (biological replicate),
-         - 'Techrep' (technical replicate).",
-      easyClose = TRUE,
-      footer = modalButton("Close")
-    ))
-    runjs('Shiny.setInputValue("showModal3", null)')  # Reset the input value to allow multiple clicks
-  })
+# Modal2: Guide RNA Library Details
+observeEvent(input$showModal2, {
+  showModal(modalDialog(
+    title = "Guide RNA Library Details",
+    HTML("Please make sure that the file you're uploading follows the required format.
+          The column names in your file should be:
+          <ul>
+            <li><strong>'SgRNA_ID'</strong> (the identifier for each guide)</li>
+            <li><strong>'SgRNA_Sequence'</strong> (the sequence of the guide RNA)</li>
+            <li><strong>'Gene_ID'</strong> (the identifier for the gene targeted by the guide)</li>
+          </ul>"),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal2", null)')  # Reset the input value
+})
 
-  observeEvent(input$showModal4, {
-    showModal(modalDialog(
-      title = "Count Matrix Upload Details",
-         "Please make sure that the file you're uploading follows the required format.
-         The column names in your file should be:
-         - 'SgRNA_Sequence' (the sequence of the guide RNA),
-         - 'Gene_ID' (the gene ID),
-         - Sample names (the expression values across the samples).",
-      easyClose = TRUE,
-      footer = modalButton("Close")
-    ))
-    runjs('Shiny.setInputValue("showModal4", null)')  # Reset the input value to allow multiple clicks
-  })
+# Modal3: Sample Information Upload Details
+observeEvent(input$showModal3, {
+  showModal(modalDialog(
+    title = "Sample Information Upload Details",
+    HTML("Please make sure that the file you're uploading follows the required format.
+          The column names in your file should be:
+          <ul>
+            <li><strong>'Fastqnames'</strong> (the name of the fastq file)</li>
+            <li><strong>'Groups'</strong> (the experimental groups)</li>
+            <li><strong>'Biorep'</strong> (biological replicate if applicable)</li>
+            <li><strong>'Techrep'</strong> (technical replicate if applicable)</li>
+          </ul>"),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal3", null)')  # Reset the input value to allow multiple clicks
+})
 
-  observeEvent(input$showModal5, {
-    showModal(modalDialog(
-      title = "Fastq Files Upload Details",
-         "Please make sure that the files you're uploading are in the correct format.
-         Ensure that the fastq files are named properly and that they are paired if necessary.",
-      easyClose = TRUE,
-      footer = modalButton("Close")
-    ))
+# Modal4: Count Matrix Upload Details
+observeEvent(input$showModal4, {
+  showModal(modalDialog(
+    title = "Count Matrix Upload Details",
+    HTML("Please make sure that the file you're uploading follows the required format.
+          The column names in your file should be:
+          <ul>
+            <li><strong>'SgRNA_Sequence'</strong> (the sequence of the guide RNA)</li>
+            <li><strong>'Gene_ID'</strong> (the gene ID)</li>
+            <li><strong>Sample names</strong> (the expression values across the samples)</li>
+          </ul>"),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal4", null)')  # Reset the input value to allow multiple clicks
+})
 
-    # Reset input after modal is shown (this allows multiple clicks)
-    runjs('Shiny.setInputValue("showModal5", null)')  # Reset the input value to allow multiple clicks
-  })
+# Modal5: Fastq Files Upload Details
+observeEvent(input$showModal5, {
+  showModal(modalDialog(
+    title = "Fastq Files Upload Details",
+    HTML("Please make sure that the files you're uploading are in the correct format.
+          Ensure that the fastq files are named properly and that they are paired if necessary."),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal5", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal6: Method Selection for Counting
+observeEvent(input$showModal6, {
+  showModal(modalDialog(
+    title = "Method Selection for Counting",
+    HTML("Here are the details about selecting a counting method:
+          You can choose one of the following methods for counting the guides:
+          <ul>
+            <li><strong>Rsubread</strong>: Uses Rsubread for counting guides.</li>
+            <li><strong>MAGeCK</strong>: Uses MAGeCK for counting guides.</li>
+            <li><strong>WEHI</strong>: A custom guide counting method developed at WEHI.</li>
+          </ul>
+          After selecting a method, click the <strong>'Get the guide counts'</strong> button to proceed with the counting process."),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal6", null)')  # Reset the input value to allow multiple clicks
+})
+
+observeEvent(input$showModal7, {
+  showModal(modalDialog(
+    title = "Create a Data Object Details",
+    HTML("
+      <p><strong>Here are the details about creating a data object:</strong></p>
+      <p>We will create an edgeR <em>DGEList</em> object using the data uploaded in the <strong>Data Upload</strong> tab.
+         The <em>DGEList</em> object contains essential information like:
+      </p>
+      <ul>
+        <li><strong>Counts</strong>: The raw read counts for each guide or gene across the samples.</li>
+        <li><strong>Samples</strong>: Metadata for each sample, such as conditions, experimental groups, etc.</li>
+        <li><strong>Associated Metadata</strong>: Additional information such as experimental replicates or conditions.</li>
+      </ul>
+      <p>The <em>DGEList</em> object serves as the foundational object for downstream analyses in <strong>edgeR</strong>,
+      including:
+      <ul>
+        <li><strong>Differential Expression Analysis</strong>: Identifying genes or guides that are differentially expressed across conditions.</li>
+        <li><strong>Filtering Data</strong>: Removing lowly expressed guides or genes to improve analysis.</li>
+        <li><strong>Normalization</strong>: Adjusting for library size or other factors to make the data comparable across samples.</li>
+      </ul>
+      <p>Once the <em>DGEList</em> object is created, you will be ready to proceed with further analyses, such as
+      identifying significant genes or guides that are associated with your experimental conditions.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal7", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 8: Quality Check Details
+observeEvent(input$showModal8, {
+  showModal(modalDialog(
+    title = "Quality Check Details",
+    HTML("
+      <p>Here are the steps for checking the quality of the experiment:</p>
+      <ul>
+        <li><strong>View guides distribution</strong>: This shows the distribution of the number of guides across the entire experiment. It's helpful for understanding how well the guides are represented across the samples.</li>
+        <li><strong>View guide distribution per gene</strong>: You can view the distribution of guides for each gene in the dataset. This option is useful for identifying whether certain genes are overrepresented in your dataset, which could indicate potential biases.</li>
+        <li><strong>View gene abundances across samples</strong>: This option shows the sum of counts for each gene across all samples. It allows you to identify the overall distribution of gene expression and check for any anomalies or inconsistencies across samples.</li>
+      </ul>
+      <p>Once you've selected a quality check method, proceed by viewing the corresponding visualizations to make adjustments as necessary.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal8", null)')  # Reset the input value
+})
+
+observeEvent(input$showModal9, {
+  showModal(modalDialog(
+    title = "Filtering Details",
+    HTML("
+      <p><strong>Filtering</strong> helps to refine the dataset by removing unwanted or irrelevant data points. This process improves the quality of the analysis by reducing noise and focusing on the most relevant data.</p>
+      <p>By filtering out lowly expressed guides or genes and other irrelevant data, we ensure that the subsequent analysis will focus on the data that best represents the biological process of interest.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal9", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 10:
+observeEvent(input$showModal10, {
+  showModal(modalDialog(
+    title = "Select Control Groups and Then Type of Filtering",
+    HTML("
+      <p><strong>Here are the details about selecting control groups and type of filtering:</strong></p>
+      <p>First, you will select the control groups. Then type of filtering from the options below. Options may take up to 1 minute to load, so please be patient. Don't leave the page while the options are being processed.</p>
+      <ul>
+        <li><strong>No Filter:</strong> This option shows the raw count figures without any filtering applied. It's useful for seeing the data as is before any adjustments.</li>
+        <li><strong>Filter Out all Zeros Counts:</strong> Filters out the guides with zero counts across all samples. This is useful to remove guides that aren't being expressed in any of the samples, reducing noise in your analysis.</li>
+        <li><strong>Strict Filtering:</strong> Uses edgeR's <em>FilterByExp</em> function to filter out lowly expressed guides. <em>FilterByExp</em> applies a statistical method to remove guides with low counts that are unlikely to show meaningful results in differential expression analysis.</li>
+        <li><strong>Permissive Filtering:</strong> A less strict filtering method compared to the strict approach, which allows more guides to remain in the dataset. This is useful when you want to retain a larger set of guides for further analysis, even if they have lower expression.</li>
+        <li><strong>Cancer Sensitive Filtering:</strong> Uses a new filtering approach developed for cancer-specific data with highly variable genes. This method leverages the count distribution in the control groups to identify and retain the most relevant guides for cancer research, particularly in datasets with high variability.</li>
+      </ul>
+      <p>Once you've selected a filtering method, you can proceed to view the results and make adjustments if necessary. You can also choose to display an MDS plot for better visualization of the results.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+  runjs('Shiny.setInputValue("showModal10", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 11: Normalisation
+observeEvent(input$showModal11, {
+  showModal(modalDialog(
+    title = "Normalisation Details",
+    HTML("
+      <p><strong>Normalisation</strong> is the process of adjusting the data to account for technical differences and biases, ensuring that the results reflect true biological variations. In this step, you can apply one of the following normalisation methods to your filtered data:</p>
+      <ul>
+        <li><strong>TMM (Trimmed Mean of M-values)</strong>: A robust method for normalizing RNA-seq data, which minimizes the effect of outliers and performs well for datasets with varying library sizes.</li>
+        <li><strong>TMMwsp (Weighted Sum of Pairs)</strong>: A variation of TMM that improves on the standard TMM method by better handling extreme outliers.</li>
+        <li><strong>RLE (Relative Log Expression)</strong>: Normalizes data based on the relative expression levels of genes across samples. This method is particularly useful for datasets with large differences in library size.</li>
+        <li><strong>Upper Quartile</strong>: Normalizes the data by scaling the counts to the upper quartile of the distribution. This method is robust to large differences in expression levels and can be useful for datasets with highly variable expression.</li>
+      </ul>
+      <p>Once the normalisation method is chosen, proceed to <strong>Analysis</strong> for differential expression analysis.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal11", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 12
+observeEvent(input$showModal12, {
+  showModal(modalDialog(
+    title = "Select Tool for Analysis",
+    HTML("
+      <p><strong>Here are the tools available for analyzing your CRISPR screen:</strong></p>
+      <ul>
+        <li><strong>MAGeCK</strong>: A widely used tool for analyzing CRISPR screen data. MAGeCK uses a model-based analysis approach to identify enriched or depleted guides, helping you detect genes that are important for your experiment. It's especially useful for identifying genetic interactions and essential genes in functional genomics studies.</li>
+        <li><strong>edgeR</strong>: A powerful tool for differential expression analysis, primarily used for RNA-seq data. In the context of CRISPR screens, edgeR can be used to identify differentially enriched or depleted guides across conditions, helping you pinpoint genes involved in your biological process. It works by modeling count data and using statistical methods to detect differences in expression between samples.</li>
+      </ul>
+      <p>Once you've selected a tool, you can proceed with the analysis using that method to analyze the CRISPR screen data.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal12", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 13
+observeEvent(input$showModal13, {
+  showModal(modalDialog(
+    title = "View Biological Variation Coefficient (BCV) Plot",
+    HTML("
+      <p><strong>Biological Variation Coefficient (BCV) Plot:</strong></p>
+      <p>The BCV plot is a diagnostic plot used to visualize the variability of gene expression data across different conditions in RNA-seq experiments. It is particularly useful in the context of differential expression analysis in **CRISPR screens** and **RNA-seq data**. The BCV plot helps assess the biological variation between different groups, providing insight into how well the data fits the underlying statistical model.</p>
+      <p><strong>What BCV plots show:</strong></p>
+      <ul>
+        <li><strong>X-axis</strong>: The number of genes (or guides in CRISPR screens) ordered by expression level.</li>
+        <li><strong>Y-axis</strong>: The biological coefficient of variation (BCV), which is a measure of relative variability across the samples.</li>
+      </ul>
+      <p>The BCV plot helps determine whether there is large variability among genes across your conditions, which can affect the quality of your differential expression analysis.</p>
+      <p>Once you check the box to display the BCV plot, it may take some time for the plot to be generated depending on the data size. Please don't leave this page until the plot is shown.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal13", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 14
+observeEvent(input$showModal14, {
+  showModal(modalDialog(
+    title = "Select the Feature You Want to Analyze",
+    HTML("
+      <p><strong>Select Feature for Analysis:</strong></p>
+      <p>In this step, you need to choose which level of analysis you want to perform for your data. You can either focus on:</p>
+      <ul>
+        <li><strong>Gene Level Analysis</strong>: This approach analyzes the gene expression or activity across all the guides targeting each gene. It focuses on the **overall gene behavior** across the entire dataset. This is useful if you want to identify the biological significance of specific genes and how they are regulated under different experimental conditions.</li>
+        <li><strong>Guide Level Analysis</strong>: This method looks at the **individual guides targeting each gene**, allowing you to focus on the performance of the specific CRISPR guides. It helps assess which individual guides have a strong effect on gene activity and which guides may be underperforming or ineffective.</li>
+      </ul>
+      <p><strong>How to Choose:</strong></p>
+      <ul>
+        <li>If you are interested in **broad gene expression analysis** across the experiment, select <strong>Gene Level Analysis</strong>.</li>
+        <li>If you want to focus on **individual guide performance**, especially in CRISPR screens, select <strong>Guide Level Analysis</strong>.</li>
+      </ul>
+      <p>Once you've made your selection, you can proceed with the appropriate analysis method.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal14", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 15
+observeEvent(input$showModal15, {
+  showModal(modalDialog(
+    title = "Select a Statistical Model to Fit",
+    HTML("
+      <p><strong>Choosing the Right Statistical Model for Your Data:</strong></p>
+      <p>In the context of CRISPR screens and RNA-seq data, the statistical model you choose plays a crucial role in analyzing the data accurately. Below are the three available models for fitting the data:</p>
+      <ul>
+        <li><strong>Ebayes</strong>: This model is used in the <strong>limma</strong> package, and it applies empirical Bayes moderation to estimate variance. It is particularly useful when you have multiple groups or conditions and need to control for the large variation in gene expression across those conditions. It is generally suitable for smaller datasets where normality assumptions hold.</li>
+        <li><strong>Generalised Linear Model (GLM)</strong>: This is a flexible and robust statistical model that generalizes linear regression to account for non-normal data distributions. GLMs are especially useful when the data doesn’t follow a normal distribution, like in the case of count data (e.g., CRISPR screens, RNA-seq data). It can be used for various distributions such as Poisson or negative binomial.</li>
+        <li><strong>Generalised Linear Model (Quasi Likelihood)</strong>: This variant of GLM is used when the assumption of constant variance does not hold, such as in RNA-seq data where the variance tends to increase with the mean. This model is useful when dealing with overdispersed data where the variance exceeds the mean.</li>
+      </ul>
+      <p><strong>How to Choose a Model:</strong></p>
+      <ul>
+        <li>If you're working with RNA-seq data or CRISPR screens with count data and wish to use a robust method for differential expression, you may prefer the <strong>GLM</strong> or <strong>Quasi Likelihood</strong> models.</li>
+        <li>If you have smaller datasets or your data fits normal assumptions, you can use the <strong>Ebayes</strong> method.</li>
+      </ul>
+      <p>Once you've selected a model, you can proceed with fitting the model and analyzing the results.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal15", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 16
+observeEvent(input$showModal15, {
+  showModal(modalDialog(
+    title = "Differential Expression Genes",
+    HTML("
+      <p><strong>Overview of Differential Expression Genes (DEGs):</strong></p>
+      <p>In CRISPR screens and RNA-seq analysis, the identification of differentially expressed genes (DEGs) is a key step in understanding which genes are associated with the experimental condition.</p>
+      <p>In this step, you can choose one of the following options for examining DEGs:</p>
+      <ul>
+        <li><strong>Check DE genes in each contrast</strong>: This option allows you to examine the DEGs for each individual contrast. You'll be able to view genes that show differential expression for specific comparisons.</li>
+        <li><strong>Compare DE genes in different contrasts</strong>: This option compares DEGs between two or more contrasts to identify common or unique genes across multiple conditions.</li>
+      </ul>
+      <p><strong>How to Use:</strong></p>
+      <ul>
+        <li>Select the option you prefer from the dropdown menu for differential expression analysis. Once you choose, additional input fields will appear to specify the contrasts and conditions you wish to analyze.</li>
+        <li>If you choose Check DE genes in each contrast, you'll be prompted to select the specific contrasts to assess individual DEGs.</li>
+        <li>If you choose Compare DE genes in different contrasts, you'll be asked to specify which two contrasts you want to compare in order to find genes that are differentially expressed between them.</li>
+      </ul>
+      <p>Once you've selected your contrast(s), proceed to examine the DEGs and explore results like volcano plots, heatmaps, and more.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal16", null)')  # Reset the input value to allow multiple clicks
+})
+
+# Modal 17
+observeEvent(input$showModal17, {
+  showModal(modalDialog(
+    title = "Gene Set Test",
+    HTML("
+      <p><strong>Overview of Select a threshold:</strong></p>
+      <p>Selecting a threshold allows you to focus on specific genes that have a number of guides greater than or equal to a user-defined threshold. This is particularly useful in CRISPR screens, where certain genes may have multiple guides targeting them, and you want to assess the effects of those genes with more than one guide.</p>
+
+      <p><strong>How to Use:</strong></p>
+      <ul>
+        <li><strong>Enter the threshold value:</strong> The threshold defines the minimum number of guides that a gene must have in order to be included in the analysis. Genes with fewer than this number of guides will not be considered in the test.</li>
+        <li><strong>Gene Set Contrast:</strong> After setting the threshold, you can select the contrast you want to compare for the gene set test. This helps in identifying which genes are significantly affected under specific experimental conditions.</li>
+        <li><strong>Download Results:</strong> After the analysis, you can download the results for further investigation and reporting.</li>
+      </ul>
+
+      <p><strong>Why Set a Threshold?</strong></p>
+      <ul>
+        <li>Setting a threshold helps ensure that genes with only a few guides (and potentially unreliable results) are excluded from the analysis.</li>
+        <li>Genes with multiple guides provide a stronger and more reliable indication of gene activity and effects.</li>
+      </ul>
+
+      <p>Once you've set the threshold and selected the contrast, proceed to view the results for the gene set analysis.</p>
+    "),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+  ))
+
+  runjs('Shiny.setInputValue("showModal17", null)')  # Reset the input value to allow multiple clicks
+})
+
   #Functions ####
   # x labels: group names + Biorep + Techrep
   get_x_lab <- function(dge){
@@ -602,25 +901,27 @@ server <- function(input, output, session) {
   #Switching between tabs ####
   observeEvent(input$gotocounting, {
     updateTabsetPanel(session, "main", "Counting")
+    runjs('window.scrollTo(0, 0);')
   })
   observeEvent(input$gotopreprocessing, {
-    updateTabsetPanel(session, "main", "Select method")
+    updateTabsetPanel(session, "main", "Preprocessing")
+    runjs('window.scrollTo(0, 0);')
   })
-  observeEvent(input$deDone, {
-    updateTabsetPanel(session,  "main", "Gene set test")
-  })
-  observeEvent(input$bcvDone, {
-    updateTabsetPanel(session,  "main", "Fitting model")
-  })
-  observeEvent(input$modDone, {
-    updateTabsetPanel(session,  "main", "DE genes")
-  })
-  observeEvent(input$filterDone, {
-    updateTabsetPanel(session,  "main", "Normalisation")
-  })
-  observeEvent(input$normDone, {
-    updateTabsetPanel(session,  "main", "Fitting model")
-  })
+  #observeEvent(input$deDone, {
+   # updateTabsetPanel(session,  "main", "Gene set test")
+  #})
+  #observeEvent(input$bcvDone, {
+  #  updateTabsetPanel(session,  "main", "Fitting model")
+  #})
+  #observeEvent(input$modDone, {
+  #  updateTabsetPanel(session,  "main", "DE genes")
+  #})
+  #observeEvent(input$filterDone, {
+  #  updateTabsetPanel(session,  "main", "Normalisation")
+  #})
+  #observeEvent(input$normDone, {
+  #  updateTabsetPanel(session,  "main", "Fitting model")
+  #})
   #Dynamically generate UI elements ####
   output$datauploadnext <- renderUI({
     req(input$count_matrix_yes_no)
@@ -658,11 +959,11 @@ server <- function(input, output, session) {
     if (input$filter_what == "zero") filter <- "All Zeros Filtered"
     if (input$filter_what == "edgeR") filter <- "edgeR FilterByExpr"
     if (input$filter_what == "filter3") filter <- "New Filter"
-    actionButton(inputId = "filterDone", label = paste("Proceed to Normalisation with ", filter, sep = ""))
+    #actionButton(inputId = "filterDone", label = paste("Proceed to Normalisation with ", filter, sep = ""))
   })
-  output$to_dim <- renderUI({
-    actionButton(inputId = "normDone", label = paste("Proceed to Analysis with ", input$norm_what, sep = ""))
-  })
+  #output$to_dim <- renderUI({
+  #  actionButton(inputId = "normDone", label = paste("Proceed to Analysis with ", input$norm_what, sep = ""))
+  #})
   #Dynamically update gene_ids based on the reactive edgeR_object ####
   observe({
     req(edgeR_object())
@@ -832,6 +1133,10 @@ server <- function(input, output, session) {
     # Clean up the sample metadata (remove the 'Groups' column)
     dge$samples$group <- dge$samples$Groups
     dge$samples$Groups <- NULL
+    dge$samples$biorep <- dge$samples$Biorep
+    dge$samples$Biorep <- NULL
+    dge$samples$techrep <- dge$samples$Techrep
+    dge$samples$Techrep <- NULL
 
     # Assign row names based on the gene names from the first column of the count matrix
     rownames(dge) <- count_data()[, 1]
@@ -890,7 +1195,7 @@ server <- function(input, output, session) {
   output$filter3_drop_down <- renderUI({
     req(edgeR_object())
     multiInput("filter3_what",
-               label = h4("Select all controlled group for filtering purpose"),
+               label = "Select all controlled group for filtering purpose",
                choices = unique(group())
     )
   })
@@ -917,7 +1222,7 @@ server <- function(input, output, session) {
       dim <- dim(edgeR_object())[1]
 
 
-      plot_density(edgeR_object(), paste("No Filter (",dim," guides left)", sep = ""))
+      plot_density(edgeR_object(), paste("No Filter (",dim," guides present)", sep = ""))
     }
   }
 
@@ -1223,73 +1528,24 @@ server <- function(input, output, session) {
   })
   ## -------------------- Normalisation --------------------
   norm_dge_tmm <- reactive({
-    if( ! is.null(filtered_dge()) ){
-      filtered_dge <- filtered_dge()
-      if (input$imputation){
-        imp.dge <- zero_imp(filtered_dge(),group())
-        imp.dge <- calcNormFactors(imp.dge, method = "TMM")
-        filtered_dge$samples$norm.factors <- imp.dge$samples$norm.factors
-        return(filtered_dge)
-      } else{
         return(calcNormFactors(filtered_dge(), method = "TMM"))
-      }
-    }
   })
 
   norm_dge_tmmwsp <- reactive({
-    if( ! is.null(filtered_dge()) &&  !is.null(input$norm_what) ){
-      filtered_dge <- filtered_dge()
-      if (input$imputation){
-        imp.dge <- zero_imp(filtered_dge(),group())
-        imp.dge <- calcNormFactors(imp.dge, method = "TMMwsp")
-        filtered_dge$samples$norm.factors <- imp.dge$samples$norm.factors
-        return(filtered_dge)
-      } else{
         return(calcNormFactors(filtered_dge(), method = "TMMwsp"))
-      }
-    }
   })
 
   norm_dge_RLE <- reactive({
-    if( ! is.null(filtered_dge()) ){
-      filtered_dge <- filtered_dge()
-      if (input$imputation){
-        imp.dge <- zero_imp(filtered_dge(),group())
-        imp.dge <- calcNormFactors(imp.dge, method = "RLE")
-        filtered_dge$samples$norm.factors <- imp.dge$samples$norm.factors
-        return(filtered_dge)
-      } else{
         return(calcNormFactors(filtered_dge(), method = "RLE"))
-      }
-    }
   })
 
   norm_dge_quant <- reactive({
-    if( ! is.null(filtered_dge()) &&  !is.null(input$norm_what) && !is.null(input$quant_num)){
-      filtered_dge <- filtered_dge()
-      if (input$imputation){
-        imp.dge <- zero_imp(filtered_dge(),group())
-        imp.dge <- calcNormFactors(imp.dge, method = "upperquartile", p=input$quant_num)
-        filtered_dge$samples$norm.factors <- imp.dge$samples$norm.factors
-        return(filtered_dge)
-      } else{
         return(calcNormFactors(filtered_dge(), method = "upperquartile", p=input$quant_num))
-      }
-    }
   })
 
   norm_dge_none <- reactive({
-    if( ! is.null(filtered_dge()) &&  !is.null(input$norm_what)){
-      filtered_dge <- filtered_dge()
-      if (input$imputation){
-        imp.dge <- zero_imp(filtered_dge(),group())
-        imp.dge <- calcNormFactors(imp.dge, method = "none")
-        filtered_dge$samples$norm.factors <- imp.dge$samples$norm.factors
-        return(filtered_dge)
-      } else{
+    if( ! is.null(filtered_dge()) &&  !is.null(input$norm_what))
         return(calcNormFactors(filtered_dge(), method = "none"))
-      }
-    }
   })
 
 
@@ -1457,7 +1713,10 @@ server <- function(input, output, session) {
     }
   })
 
-
+observeEvent(design(), {
+  # Print the design matrix to the console
+  print(design())
+})
 
   disp_dge <- reactive({
     if(! is.null(normed_dge()) && ! is.null(design())){
@@ -1503,6 +1762,11 @@ server <- function(input, output, session) {
     }
   })
 
+  observeEvent(contrast(), {
+  # Print the design matrix to the console
+  print(contrast())
+})
+
   v_dge <- reactive({
     if(!is.null(disp_dge()) && !is.null(design())){
       return(voom(disp_dge(), design(), plot = FALSE))
@@ -1514,7 +1778,9 @@ server <- function(input, output, session) {
       return(limma_pipeline(disp_dge(), design(), contrast()))
     }
   })
-
+  observeEvent(efit(), {
+    print(efit())  # Print the efit to the console
+  })
 
   limma_df <- function(){
     if(!is.null(efit())){
@@ -1524,14 +1790,14 @@ server <- function(input, output, session) {
 
   limma_tab <- function(){
     if(!is.null(limma_df())){
-      datatable(limma_df(), rownames = TRUE)
+      limma_df()
     }
   }
 
 
 
   output$limma_table <-  DT::renderDataTable({
-    if(!is.null(limma_tab())) limma_tab()
+    if(!is.null(limma_tab())) datatable(limma_tab(),rownames = TRUE)
   })
 
   output$download_limma_table <- downloadHandler(
@@ -1609,26 +1875,26 @@ server <- function(input, output, session) {
 
 
 
-  output$to_de <- renderUI({
-    actionButton(inputId = "modDone", label = paste("Proceed to examine DE genes with ", input$model, sep = ""))
-  })
+  #output$to_de <- renderUI({
+  #  actionButton(inputId = "modDone", label = paste("Proceed to examine DE genes with ", input$model, sep = ""))
+  #})
 
-  output$to_gene_set <- renderUI({
-    actionButton(inputId = "deDone", label = paste("Proceed to gene set test ", sep = ""))
-  })
+  #output$to_gene_set <- renderUI({
+  #  actionButton(inputId = "deDone", label = paste("Proceed to gene set test ", sep = ""))
+  #})
 
-  observeEvent(input$deDone, {
-    updateTabsetPanel(session,  "main", "Gene set test")
-  })
+  #observeEvent(input$deDone, {
+  #  updateTabsetPanel(session,  "main", "Gene set test")
+  #})
 
 
-  observeEvent(input$bcvDone, {
-    updateTabsetPanel(session,  "main", "Fitting model")
-  })
+  #observeEvent(input$bcvDone, {
+  #  updateTabsetPanel(session,  "main", "Fitting model")
+  #})
 
-  observeEvent(input$modDone, {
-    updateTabsetPanel(session,  "main", "DE genes")
-  })
+  #observeEvent(input$modDone, {
+  #  updateTabsetPanel(session,  "main", "DE genes")
+  #})
 
 
   ## Examine DE genes
@@ -1990,6 +2256,10 @@ server <- function(input, output, session) {
       return(get_gene_symbol_lis(disp_dge(),threshold))
     }
   })
+
+observeEvent(genesymbollist(), {
+  print(genesymbollist())  # Print the genesymbollist to the console
+})
 
   fry_table <- function(){
     req(genesymbollist())

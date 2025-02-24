@@ -430,7 +430,7 @@ get_contrast_matrix <- function(dge, design){
        k <- k+1
     }
   }
-  x <- paste(unique.pairs[,1], unique.pairs[,2], sep = "-")
+  x <- paste(unique.pairs[,2], unique.pairs[,1], sep = "-")
   contrast <- makeContrasts(contrasts = x,levels = make.names(colnames(design)))
   return(contrast)
 }
